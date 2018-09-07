@@ -131,8 +131,8 @@ typedef struct {
 #define TIM_SMCR_TS_MASK	(0x7 << (TIM_SMCR_TS_SHIFT))
 #define TIM_SMCR_TS_ITR0	(0 << (TIM_SMCR_TS_SHIFT))
 #define TIM_SMCR_TS_ITR1	(1 << (TIM_SMCR_TS_SHIFT))
-#define TIM_SMCR_TS_RESERVED2	(2 << (TIM_SMCR_TS_SHIFT))
-#define TIM_SMCR_TS_RESERVED3	(3 << (TIM_SMCR_TS_SHIFT))
+#define TIM_SMCR_TS_ITR2	(2 << (TIM_SMCR_TS_SHIFT))
+#define TIM_SMCR_TS_ITR3	(3 << (TIM_SMCR_TS_SHIFT))
 #define TIM_SMCR_TS_TI1F_ED	(4 << (TIM_SMCR_TS_SHIFT))
 #define TIM_SMCR_TS_TI1FP1	(5 << (TIM_SMCR_TS_SHIFT))
 #define TIM_SMCR_TS_TI2FP2	(6 << (TIM_SMCR_TS_SHIFT))
@@ -497,6 +497,8 @@ typedef struct {
 #define TIM_OR2_ETRSEL_COMP2OUT (2 << (TIM_OR2_ETRSEL_SHIFT))
 
   __IO uint32_t	OR3;		/* 0x64 1,          */
+
+  __IO uint32_t TISEL;          /* 0x68 1,          */
 } stm32Dev_TIM;
 
 
