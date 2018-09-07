@@ -7,15 +7,23 @@
 #define __NVIC_PRIO_BITS        4
 #define __Vendor_SysTickConfig  0
 
+#ifndef __IO
+#define __IO            volatile
+#endif
 
 
+/*************************************************************
+ * base address definitions
+ */
 #define AHB1_BASE               (0x40020000)
 #define AHB2_BASE               (0x48000000)
 #define APB1_BASE               (0x40000000)
 #define APB2_BASE               (0x40010000)
 
 
-
+/*************************************************************
+ * interrupt request definitions
+ */
 enum irqNumbers {
   Reset_IRQn            =  (-15),
   NMI_IRQn              =  (-14),
@@ -36,13 +44,9 @@ enum irqNumbers {
   USART1_IRQn             =  37,
   USART2_IRQn,
   USART3_IRQn,
-  
 };
 
 typedef int     IRQn_Type;
-#ifndef __IO
-#define __IO    volatile
-#endif
 
 /***
  * GPIO
@@ -187,7 +191,7 @@ struct _stStm32l4_DMA {
 #define ISR_HTIF_MASK(d)	(1 << (((d)<<2) + 2))
 #define ISR_TCIF_MASK(d)	(1 << (((d)<<2) + 1))
 #define ISR_GIF_MASK(d)		(1 << (((d)<<2) + 0))
-  
+
   __IO uint32_t	ifcr;
 #define ISR_CTEIF_CLEAR(d)	(1 << (((d)<<2) + 3))
 #define ISR_CHTIF_CLEAR(d)	(1 << (((d)<<2) + 2))
@@ -505,7 +509,7 @@ struct _stStm32l4_I2C {
 #define OAR1_OA1_7BIT_MASK	(1 << (OAR1_OA1_7BIT_SHIFT))
 #define OAR1_OA1_10BIT_SHIFT	0
 #define OAR1_OA1_10BIT_MASK	(1 << (OAR1_OA1_10BIT_SHIFT))
-  
+
   __IO uint32_t	oar2;		/* 0x0c */
   __IO uint32_t	timingr;	/* 0x10 */
   __IO uint32_t	timeoutr;	/* 0x14 */
@@ -711,7 +715,7 @@ struct _stStm32l4_DAC {
 #define MCR_MODE1_SH_ONCHIP_BUF		(5 << (MCR_MODE1_SHIFT))
 #define MCR_MODE1_SH_EXTPIN		(6 << (MCR_MODE1_SHIFT))
 #define MCR_MODE1_SH_ONCHIP		(7 << (MCR_MODE1_SHIFT))
-  
+
   __IO uint32_t	shsr1;			/* 0x40 */
   __IO uint32_t	shsr2;			/* 0x44 */
   __IO uint32_t	shhr;			/* 0x48 */
