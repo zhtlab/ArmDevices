@@ -24,47 +24,49 @@
 #ifndef _STM32Gpio_H_
 #define _STM32Gpio_H_
 
-typedef struct {
-  __IO uint32_t		moder;
+
+struct _stStm32l4_GPIO {
+  __IO uint32_t		MODER;
 #define MODE_INPUT(x)		(0 << ((x)*2))
 #define MODE_OUTPUT(x)		(1 << ((x)*2))
 #define MODE_FUNC(x)		(2 << ((x)*2))
 #define MODE_ANALOG(x)		(3 << ((x)*2))
 #define MODE_MASK(x)		(3 << ((x)*2))
 #define MODE_SET(x, v)		((v) << ((x)*2))
-  __IO uint32_t		otyper;
+  __IO uint32_t		OTYPER;
 #define OTYPE_PUSHPULL(x)	(0 << (x))
 #define OTYPE_OD(x)		(1 << (x))
 #define OTYPE_MASK(x)		(1 << (x))
-  __IO uint32_t		ospeedr;
+  __IO uint32_t		OSPEEDR;
 #define OSPEED_LOW(x)		(0 << ((x)*2))
 #define OSPEED_MED(x)		(1 << ((x)*2))
 #define OSPEED_HIGH(x)		(2 << ((x)*2))
 #define OSPEED_EXHIGH(x)	(3 << ((x)*2))
 #define OSPEED_MASK(x)		(3 << ((x)*2))
-  __IO uint32_t		pupdr;
+  __IO uint32_t		PUPDR;
 #define PUPD_NONE(x)		(0 << ((x)*2))
 #define PUPD_PU(x)		(1 << ((x)*2))
 #define PUPD_PD(x)		(2 << ((x)*2))
 #define PUPD_RESERVED(x)	(3 << ((x)*2))
 #define PUPD_X(x, d)		((d) << ((x)*2))
 #define PUPD_MASK(x)		(3 << ((x)*2))
-  __IO uint32_t		idr;
+  __IO uint32_t		IDR;
 #define IDR_MASK(x)		(1 << (x))
-  __IO uint32_t		odr;
+  __IO uint32_t		ODR;
 #define ODR_0(x)		( 0  << (x))
 #define ODR_1(x)		( 1  << (x))
 #define ODR_X(x, d)		((d) << (x))
 #define ODR_MASK(x)		( 1  << (x))
-  __IO uint32_t		bsrr;
+  __IO uint16_t		BSRR;
 #define BSRR_SET(x)		( 1  << (x))
-#define BSRR_RESET(x)		( 1  << ((x)+16))
-  __IO uint32_t		lckr;
+  __IO uint16_t		BRR;
+#define BRR_RESET(x)		( 1  << (x))
+  __IO uint32_t		LCKR;
 #define LCKR_LCKK_SHIFT		(16)
 #define LCKR_LCKK_0		(0 << (LCKR_LCKK_SHIFT))
 #define LCKR_LCKK_1		(1 << (LCKR_LCKK_SHIFT))
 #define LCKR_LCKK_MASK		(1 << (LCKR_LCKK_SHIFT))
-  __IO uint32_t		afrl;
+  __IO uint32_t		AFRL;
 #define AFRL_X(x, d)		(((d)&15) << (((x) & 7)*4))
 #define AFRL_MASK(x)		((0xf)    << (((x) & 7)*4))
 #define AFL_0		0
@@ -79,6 +81,7 @@ typedef struct {
 #define FUNC0_SYS	0
 #define FUNC1_TIM	1
 #define FUNC2_TIM	2
+#define FUNC3_TIM	3
 #define FUNC3_USART	3
 #define FUNC4_I2C	4
 #define FUNC5_SPI	5
@@ -86,15 +89,17 @@ typedef struct {
 #define FUNC7_USART	7
 #define FUNC8_LPUART	8
 #define FUNC9_CAN	9
+#define FUNC9_FMC	9
 #define FUNC10_USB	10
 #define FUNC11_LCD	11
 #define FUNC12_SD	12
+#define FUNC12_FMC	12
 #define FUNC12_COMP	12
 #define FUNC13_SAI	13
 #define FUNC14_TIM	14
 #define FUNC15		15
 
-  __IO uint32_t		afrh;
+  __IO uint32_t		AFRH;
 #define AFRH_X(x, d)		(((d)&15) << (((x) & 7)*4))
 #define AFRH_MASK(x)		((0xf)    << (((x) & 7)*4))
 #define AFH_8		0
@@ -105,16 +110,17 @@ typedef struct {
 #define AFH_13		5
 #define AFH_14		6
 #define AFH_15		7
-  
-  __IO uint32_t		brr;
-#define BRR_RESET(x)		( 1  << (x))
 
-  __IO uint32_t		gpio_reserved[0xf5];
-} stm32Dev_GPIO;
+  __IO uint32_t		gpio_reserved[0xf6];
+};
+
+typedef struct _stStm32l4_GPIO  stm32Dev_GPIO;
+
 #define GPIO_MODULE_A	0
 #define GPIO_MODULE_B	1
 #define GPIO_MODULE_C	2
 #define GPIO_MODULE_H	7
+/*#define GPIO		(GPIO_PTR[8])*/
 
 
 #endif
