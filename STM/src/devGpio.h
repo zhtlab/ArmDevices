@@ -122,19 +122,19 @@
 
 #if 0
 #define GPIO_DRIVE_EN(portnum)  \
-  (GPIO_PTR[(((portnum) & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT)].otype =  (1<<(((portnum) & GPIO_NUM_MASK) >> GPIO_NUM_SHIFT)))
+  (GPIO_PTR[(((portnum) & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT)].OTYPE =  (1<<(((portnum) & GPIO_NUM_MASK) >> GPIO_NUM_SHIFT)))
 #define GPIO_DRIVE_DIS(portnum) \
-  (GPIO_PTR[(((portnum) & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT)].otype =  (1<<(((portnum) & GPIO_NUM_MASK) >> GPIO_NUM_SHIFT)))
+  (GPIO_PTR[(((portnum) & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT)].OTYPE =  (1<<(((portnum) & GPIO_NUM_MASK) >> GPIO_NUM_SHIFT)))
 #endif
 
 #define GPIO_GET(portnum)       \
-  (((GPIO_PTR[(((portnum) & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT)].idr) >> (((portnum) & GPIO_NUM_MASK) >> GPIO_NUM_SHIFT)) & 1)
+  (((GPIO_PTR[(((portnum) & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT)].IDR) >> (((portnum) & GPIO_NUM_MASK) >> GPIO_NUM_SHIFT)) & 1)
 #define GPIO_GETO(portnum)      \
-  (((GPIO_PTR[(((portnum) & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT)].odr) >> (((portnum) & GPIO_NUM_MASK) >> GPIO_NUM_SHIFT)) & 1)
+  (((GPIO_PTR[(((portnum) & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT)].ODR) >> (((portnum) & GPIO_NUM_MASK) >> GPIO_NUM_SHIFT)) & 1)
 #define GPIO_SET(portnum)       \
-  (GPIO_PTR[(((portnum) & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT)].bsrr =  (1<<(((portnum) & GPIO_NUM_MASK) >> GPIO_NUM_SHIFT)))
+  (GPIO_PTR[(((portnum) & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT)].BSRR =  (1<<(((portnum) & GPIO_NUM_MASK) >> GPIO_NUM_SHIFT)))
 #define GPIO_CLEAR(portnum)     \
-  (GPIO_PTR[(((portnum) & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT)].brr  =  (1<<(((portnum) & GPIO_NUM_MASK) >> (GPIO_NUM_SHIFT))))
+  (GPIO_PTR[(((portnum) & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT)].BRR  =  (1<<(((portnum) & GPIO_NUM_MASK) >> (GPIO_NUM_SHIFT))))
 
 
 

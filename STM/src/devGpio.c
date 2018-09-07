@@ -53,28 +53,28 @@ DevGpioSet(uint16_t v)
 
   port = (v & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   num  = (v & GPIO_NUM_MASK)  >> GPIO_NUM_SHIFT;
-  mode = (v & GPIO_MODE_MASK)  >> GPIO_MODE_SHIFT;
+  mode = (v & GPIO_MODE_MASK) >> GPIO_MODE_SHIFT;
   pull = (v & GPIO_PULL_MASK) >> GPIO_PULL_SHIFT;
 
   if(mode == (GPIO_MODE_OUTPUT>>GPIO_MODE_SHIFT)) {
     if(v & GPIO_VALFUNC_MASK) {
-      GPIO_PTR[port].bsrr = (1<<num);
+      GPIO_PTR[port].BSRR = (1<<num);
     } else {
-      GPIO_PTR[port].brr  = (1<<num);
+      GPIO_PTR[port].BRR  = (1<<num);
     }
 
   } else if(mode == (GPIO_MODE_FUNC>>GPIO_MODE_SHIFT)) {
     func = (v & GPIO_FUNC_MASK) >> GPIO_FUNC_SHIFT;
     if(num <= AFL_7) {
-      val = GPIO_PTR[port].afrl;
+      val = GPIO_PTR[port].AFRL;
       val &= ~AFRL_MASK(num);
       val |=  AFRL_X(num, func);
-      GPIO_PTR[port].afrl = val;
+      GPIO_PTR[port].AFRL = val;
     } else {
-      val = GPIO_PTR[port].afrh;
+      val = GPIO_PTR[port].AFRH;
       val &= ~AFRH_MASK(num-8);
       val |=  AFRH_X(num-8, func);
-      GPIO_PTR[port].afrh = val;
+      GPIO_PTR[port].AFRH = val;
     }
 #if 0
   } else if(mode == (GPIO_MODE_ANALOG>>GPIO_MODE_SHIFT)) {
@@ -82,7 +82,7 @@ DevGpioSet(uint16_t v)
 #endif
   }
 
-  val  = GPIO_PTR[port].otyper;
+  val  = GPIO_PTR[port].OTYPER;
   val &= ~OTYPE_MASK(num);
   if(mode == (GPIO_MODE_FUNC>>GPIO_MODE_SHIFT) ||
      mode == (GPIO_MODE_OUTPUT>>GPIO_MODE_SHIFT)) {
@@ -92,22 +92,22 @@ DevGpioSet(uint16_t v)
       val |=  OTYPE_OD(num);
     }
   }
-  GPIO_PTR[port].otyper = val;
+  GPIO_PTR[port].OTYPER = val;
 
-  val = GPIO_PTR[port].pupdr;
+  val = GPIO_PTR[port].PUPDR;
   val &= ~PUPD_MASK(num);
   val |=  PUPD_X(num, pull);
-  GPIO_PTR[port].pupdr = val;
+  GPIO_PTR[port].PUPDR = val;
 
-  val = GPIO_PTR[port].ospeedr;
+  val = GPIO_PTR[port].OSPEEDR;
   val &= ~OSPEED_MASK(num);
   val |=  OSPEED_HIGH(num);
-  GPIO_PTR[port].ospeedr = val;
+  GPIO_PTR[port].OSPEEDR = val;
 
-  val = GPIO_PTR[port].moder;
+  val = GPIO_PTR[port].MODER;
   val &= ~MODE_MASK(num);
   val |=  MODE_SET(num, mode);
-  GPIO_PTR[port].moder = val;
+  GPIO_PTR[port].MODER = val;
 
   return;
 }
@@ -136,10 +136,10 @@ DevGpioAnalogInit(int group, int bit)
 {
   uint32_t              val;
 
-  val = GPIO_PTR[group].moder;
+  val = GPIO_PTR[group].MODER;
   val &= ~MODE_MASK(bit);
   val |=  MODE_ANALOG(bit);
-  GPIO_PTR[group].moder = val;
+  GPIO_PTR[group].MODER = val;
 
   return;
 }
@@ -148,31 +148,31 @@ DevGpioAnalogInit(int group, int bit)
 void
 DevGpioSetPowerLedOff(void)
 {
-  GPIO_PTR[CONFIG_POWER_LED_PORTNUM].brr = (1UL<<(CONFIG_POWER_LED_BITNUM));
+  GPIO_PTR[CONFIG_POWER_LED_PORTNUM].BRR = (1UL<<(CONFIG_POWER_LED_BITNUM));
   return;
 }
 void
 DevGpioSetPowerLedOn(void)
 {
-  GPIO_PTR[CONFIG_POWER_LED_PORTNUM].bsrr = (1UL<<(CONFIG_POWER_LED_BITNUM));
+  GPIO_PTR[CONFIG_POWER_LED_PORTNUM].BSRR = (1UL<<(CONFIG_POWER_LED_BITNUM));
   return;
 }
 void
 DevGpioSetUpdateLedOff(void)
 {
-  GPIO_PTR[CONFIG_UPDATE_LED_PORTNUM].brr = (1UL<<(CONFIG_UPDATE_LED_BITNUM));
+  GPIO_PTR[CONFIG_UPDATE_LED_PORTNUM].BRR = (1UL<<(CONFIG_UPDATE_LED_BITNUM));
   return;
 }
 void
 DevGpioSetUpdateLedOn(void)
 {
-  GPIO_PTR[CONFIG_UPDATE_LED_PORTNUM].bsrr = (1UL<<(CONFIG_UPDATE_LED_BITNUM));
+  GPIO_PTR[CONFIG_UPDATE_LED_PORTNUM].BSRR = (1UL<<(CONFIG_UPDATE_LED_BITNUM));
   return;
 }
 int
 DevGpioGetPowerSw(void)
 {
-  return (GPIO_PTR[CONFIG_POWER_SW_PORTNUM].idr >> (CONFIG_POWER_SW_BITNUM)) & 1;
+  return (GPIO_PTR[CONFIG_POWER_SW_PORTNUM].IDR >> (CONFIG_POWER_SW_BITNUM)) & 1;
 }
 
 #endif
