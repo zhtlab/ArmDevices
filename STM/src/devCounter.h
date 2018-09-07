@@ -54,7 +54,13 @@ typedef struct {
 #define DEVCOUNTER_CH_MAX         9
 #define DEVCOUNTER_CH_CLKTRG      15
   struct {
-    uint16_t            mode;           /* [15:12] mode
+    uint32_t            mode;           /*
+                                         * [31]    slave trigger mode
+                                         * [16:19] trgo trigger output selection
+                                         *            0: reset
+                                         *            1: enable
+                                         *            2: update
+                                         * [15:12] mode
                                          *            0: Freerun
                                          *            1: Reset
                                          *            2: Gate
@@ -67,6 +73,15 @@ typedef struct {
                                          *            2: ETF  (ETF[3:0])
                                          *   [7:0] input sel  TS[4:0], ETF[3:0]
                                          */
+#define DEVTIME_CLKTRG_SLAVE_SHIFT      (31)
+#define DEVTIME_CLKTRG_SLAVE_MASK       (1 << (DEVTIME_CLKTRG_SLAVE_SHIFT))
+#define DEVTIME_CLKTRG_SLAVE_NO         (0 << (DEVTIME_CLKTRG_SLAVE_SHIFT))
+#define DEVTIME_CLKTRG_SLAVE_YES        (1 << (DEVTIME_CLKTRG_SLAVE_SHIFT))
+#define DEVTIME_CLKTRG_TRGO_SHIFT       (16)
+#define DEVTIME_CLKTRG_TRGO_MASK        (7 << (DEVTIME_CLKTRG_TRGO_SHIFT))
+#define DEVTIME_CLKTRG_TRGO_RESET       (0 << (DEVTIME_CLKTRG_TRGO_SHIFT))
+#define DEVTIME_CLKTRG_TRGO_ENABLE      (1 << (DEVTIME_CLKTRG_TRGO_SHIFT))
+#define DEVTIME_CLKTRG_TRGO_UPDATE      (2 << (DEVTIME_CLKTRG_TRGO_SHIFT))
 #define DEVTIME_CLKTRG_MODE_SHIFT       (12)
 #define DEVTIME_CLKTRG_MODE_MASK        (0xf << (DEVTIME_CLKTRG_MODE_SHIFT))
 #define DEVTIME_CLKTRG_MODE_FREERUN     (0 << (DEVTIME_CLKTRG_MODE_SHIFT))
@@ -124,6 +139,7 @@ struct _stDevCounter {
 
 int             DevCounterInit(int unit, devCounterParam_t *param);
 
+int             DevCounterGetCounterValue(int unit, int ch, uint32_t *pVal);
 int             DevCounterSetPwmDutyValue(int unit, int ch, uint32_t val);
 int             DevCounterGetIcValue(int unit, int ch, uint32_t *pVal);
 

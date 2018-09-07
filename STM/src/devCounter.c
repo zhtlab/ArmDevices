@@ -31,10 +31,13 @@
 #include        "devCounter.h"
 
 struct _stDevCounter      counter;
-#if 0
-#define SYSTEM_TIMER_REG        (TIM5->CNT)     /* decrement counter */
-#endif
 
+const static uint32_t sms[] = {
+  /*freerun            reset               gate,                */
+  TIM_SMCR_SMS_INTCLK, TIM_SMCR_SMS_RESET, TIM_SMCR_SMS_GATED,
+  /* start,           restart,            enc */
+  TIM_SMCR_SMS_TRIGGER, TIM_SMCR_SMS_RESET, TIM_SMCR_SMS_ENC1
+};
 int
 DevCounterInit(int unit, devCounterParam_t *param)
 {
@@ -46,11 +49,14 @@ DevCounterInit(int unit, devCounterParam_t *param)
   uint32_t              cr2 = 0;
   uint32_t              dier = 0;
   uint32_t              smcr = 0;
+  uint32_t              val;
 
   if(unit == -1) {
     memset(&counter, 0, sizeof(counter));
     counter.sc[1].dev  = TIM1_PTR;
     counter.sc[2].dev  = TIM2_PTR;
+    counter.sc[3].dev  = TIM3_PTR;
+    counter.sc[4].dev  = TIM4_PTR;
     counter.sc[15].dev = TIM15_PTR;
     counter.sc[16].dev = TIM16_PTR;
 
@@ -66,6 +72,22 @@ DevCounterInit(int unit, devCounterParam_t *param)
       if(param->clktrg.polneg) {
         smcr |= TIM_SMCR_ETP_FALLING;
       }
+      /* set the slave mode */
+      if(param->clktrg.mode & DEVTIME_CLKTRG_SLAVE_MASK) smcr |= TIM_SMCR_MSM_SYNC;
+      /* set the input clock/triger mode */
+      val   = param->clktrg.mode & DEVTIME_CLKTRG_MODE_MASK;
+      val >>= DEVTIME_CLKTRG_MODE_SHIFT;
+      smcr |= sms[val];
+      /* set input trigger sel */
+      val   = param->clktrg.mode & DEVTIME_CLKTRG_SEL_MASK;
+      val >>= DEVTIME_CLKTRG_SEL_SHIFT;
+      val <<= TIM_SMCR_TS_SHIFT;
+      smcr |= val & TIM_SMCR_TS_MASK;
+      /* set output trigger sel */
+      val   = param->clktrg.mode & DEVTIME_CLKTRG_TRGO_MASK;
+      val >>= DEVTIME_CLKTRG_TRGO_SHIFT;
+      val <<= TIM_CR2_MMS_SHIFT;
+      cr2 |= val & TIM_CR2_MMS_MASK;
     } else {
       if((param->clktrg.mode & DEVTIME_CLKTRG_CTG_MASK) == DEVTIME_CLKTRG_CTG_EXTERNAL2) {
         smcr |= TIM_SMCR_ECE_MODE2EN;
@@ -84,7 +106,9 @@ DevCounterInit(int unit, devCounterParam_t *param)
     if(param->clktrg.down) {
       cr1 |= TIM_CR1_DIR_DOWN;  /* down counter */
     }
-    cr1 |= TIM_CR1_CEN_YES;
+    if(!(smcr &TIM_SMCR_MSM_MASK)) {
+      cr1 |= TIM_CR1_CEN_YES;
+    }
   }
 
   /*** capture/compare channel settings */
@@ -129,7 +153,6 @@ DevCounterInit(int unit, devCounterParam_t *param)
     p->CCER  |= ccer;
     p->BDTR   = bdtr;
     p->DIER  |= dier;
-    cr1 |= TIM_CR1_CEN_YES;
   }
 
   if(param->chnum & DEVCOUNTER_SETCH(DEVCOUNTER_CH_CLKTRG)) {
@@ -138,7 +161,7 @@ DevCounterInit(int unit, devCounterParam_t *param)
     p->RCR = 0;
     p->SMCR = smcr;
 
-    /* p->CR2 = 0x70;            MMX[6:4]  out to DMAREQ */
+    p->CR2  = cr2;
     p->CR1 |= cr1;
   }
 end:
@@ -146,6 +169,22 @@ end:
 }
 
 
+int
+DevCounterGetCounterValue(int unit, int ch, uint32_t *pVal)
+{
+  int                   result = -1;
+  stm32Dev_TIM          *p;
+
+  if(!pVal) goto fail;
+
+  if(ch > 4 || ch < 0) goto fail;
+  p = counter.sc[unit].dev;
+  *pVal = (&p->CNT)[ch-1];
+
+  result = 0;
+fail:
+  return result;
+}
 int
 DevCounterSetPwmDutyValue(int unit, int ch, uint32_t val)
 {
@@ -193,20 +232,3 @@ DevCounterDebugShowRegs(int unit)
 
   return;
 }
-
-
-#if 0
-uint32_t
-DevCounterGetSystemTimer(void)
-{
-  return SYSTEM_TIMER_REG;
-}
-void
-DevCounterWaitSystemTimer(uint32_t tout)
-{
-  uint32_t      t;
-  t = SYSTEM_TIMER_REG;
-  while((t - (SYSTEM_TIMER_REG)) < tout);
-  return;
-}
-#endif
