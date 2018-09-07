@@ -71,6 +71,7 @@ int             DevUsartLoop(int unit);
 int             DevUsartSend(int unit, uint8_t *ptr, int size);
 int             DevUsartRecv(int unit, uint8_t *ptr, int size);
 int             DevUsartGetDataLen(int unit);
+void            DevUsart1Interrupt(void);
 void            DevUsart2Interrupt(void);
 void            DevUsart3Interrupt(void);
 

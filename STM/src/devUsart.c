@@ -71,11 +71,11 @@ DevUsartInit(int unit, devUsartParam_t *param)
 
   switch(unit) {
   case        2:
-    masterClk = clk.pclk1;
+    masterClk = clk.pclk1;      /* adhoc */
     irq = USART2_IRQn;
     break;
   case        3:
-    masterClk = clk.pclk2;
+    masterClk = clk.pclk2;      /* adhoc */
     irq = USART3_IRQn;
   }
 
@@ -235,6 +235,11 @@ DevUsartInterrupt(int unit)
 fail:
 
   return;
+}
+void
+DevUsart1Interrupt(void)
+{
+  DevUsartInterrupt(1);
 }
 void
 DevUsart2Interrupt(void)
