@@ -55,11 +55,18 @@ DevCounterInit(int unit, devCounterParam_t *param)
     memset(&counter, 0, sizeof(counter));
     counter.sc[1].dev  = TIM1_PTR;
     counter.sc[2].dev  = TIM2_PTR;
+#ifdef TIM3_PTR
     counter.sc[3].dev  = TIM3_PTR;
+#endif
+#ifdef TIM3_PTR
     counter.sc[4].dev  = TIM4_PTR;
+#endif
+#ifdef TIM15_PTR
     counter.sc[15].dev = TIM15_PTR;
+#endif
+#ifdef TIM16_PTR
     counter.sc[16].dev = TIM16_PTR;
-
+#endif
     goto end;
   }
 
