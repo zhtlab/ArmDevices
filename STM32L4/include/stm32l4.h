@@ -39,6 +39,7 @@ enum irqNumbers {
   TIM1_UP_TIM15_IRQn,
   TIM1_TRG_COM_IRQn,
   TIM1_CC_IRQn,
+  ADC_IRQn                =  18,
   TIM2_IRQn               =  28,
   TIM3_IRQn,
   USART1_IRQn             =  37,
@@ -581,6 +582,179 @@ struct _stStm32l4_I2C {
 #define I2C2_PTR	((struct _stStm32l4_I2C *) (APB1_BASE + 0x5800))
 #define I2C3_PTR	((struct _stStm32l4_I2C *) (APB1_BASE + 0x5c00))
 
+
+/*******************************************
+ * 16 ADC
+ */
+typedef struct {
+  __IO uint32_t         ISR;            /* 0x00 */
+#define ADC_ISR_OVR_SHIFT       (4)
+#define ADC_ISR_OVR_MASK        (1 << (ADC_ISR_OVR_SHIFT))
+#define ADC_ISR_OVR_NO          (0 << (ADC_ISR_OVR_SHIFT))
+#define ADC_ISR_OVR_YES         (1 << (ADC_ISR_OVR_SHIFT))
+#define ADC_ISR_EOS_SHIFT       (3)
+#define ADC_ISR_EOS_MASK        (1 << (ADC_ISR_EOS_SHIFT))
+#define ADC_ISR_EOS_NO          (0 << (ADC_ISR_EOS_SHIFT))
+#define ADC_ISR_EOS_YES         (1 << (ADC_ISR_EOS_SHIFT))
+#define ADC_ISR_EOC_SHIFT       (2)
+#define ADC_ISR_EOC_MASK        (1 << (ADC_ISR_EOC_SHIFT))
+#define ADC_ISR_EOC_NO          (0 << (ADC_ISR_EOC_SHIFT))
+#define ADC_ISR_EOC_YES         (1 << (ADC_ISR_EOC_SHIFT))
+#define ADC_ISR_EOSMP_SHIFT     (1)
+#define ADC_ISR_EOSMP_MASK      (1 << (ADC_ISR_EOSMP_SHIFT))
+#define ADC_ISR_EOSMP_NO        (0 << (ADC_ISR_EOSMP_SHIFT))
+#define ADC_ISR_EOSMP_YES       (1 << (ADC_ISR_EOSMP_SHIFT))
+#define ADC_ISR_ADRDY_SHIFT     (0)
+#define ADC_ISR_ADRDY_MASK      (1 << (ADC_ISR_ADRDY_SHIFT))
+#define ADC_ISR_ADRDY_NO        (0 << (ADC_ISR_ADRDY_SHIFT))
+#define ADC_ISR_ADRDY_YES       (1 << (ADC_ISR_ADRDY_SHIFT))
+  __IO uint32_t         IER;            /* 0x04 */
+  __IO uint32_t         CR;             /* 0x08 */
+#define ADC_CR_DEEPPWD_SHIFT    (29)
+#define ADC_CR_DEEPPWD_MASK     (1 << (ADC_CR_DEEPPWD_SHIFT))
+#define ADC_CR_DEEPPWD_NO       (0 << (ADC_CR_DEEPPWD_SHIFT))
+#define ADC_CR_DEEPPWD_YES      (1 << (ADC_CR_DEEPPWD_SHIFT))
+#define ADC_CR_ADVREGEN_SHIFT   (28)
+#define ADC_CR_ADVREGEN_MASK    (1 << (ADC_CR_ADVREGEN_SHIFT))
+#define ADC_CR_ADVREGEN_NO      (0 << (ADC_CR_ADVREGEN_SHIFT))
+#define ADC_CR_ADVREGEN_YES     (1 << (ADC_CR_ADVREGEN_SHIFT))
+  /* boost is not supported */
+#define ADC_CR_BOOST_SHIFT      (8)
+#define ADC_CR_BOOST_MASK       (1 << (ADC_CR_BOOST_SHIFT))
+#define ADC_CR_BOOST_NO         (0 << (ADC_CR_BOOST_SHIFT))
+#define ADC_CR_BOOST_YES        (0 << (ADC_CR_BOOST_SHIFT))
+#define ADC_CR_ADSTP_SHIFT      (4)
+#define ADC_CR_ADSTP_MASK       (1 << (ADC_CR_ADSTP_SHIFT))
+#define ADC_CR_ADSTP_NO         (0 << (ADC_CR_ADSTP_SHIFT))
+#define ADC_CR_ADSTP_YES        (1 << (ADC_CR_ADSTP_SHIFT))
+#define ADC_CR_ADSTART_SHIFT    (2)
+#define ADC_CR_ADSTART_MASK     (1 << (ADC_CR_ADSTART_SHIFT))
+#define ADC_CR_ADSTART_NO       (0 << (ADC_CR_ADSTART_SHIFT))
+#define ADC_CR_ADSTART_YES      (1 << (ADC_CR_ADSTART_SHIFT))
+#define ADC_CR_ADDIS_SHIFT      (1)
+#define ADC_CR_ADDIS_MASK       (1 << (ADC_CR_ADDIS_SHIFT))
+#define ADC_CR_ADDIS_NO         (0 << (ADC_CR_ADDIS_SHIFT))
+#define ADC_CR_ADDIS_YES        (1 << (ADC_CR_ADDIS_SHIFT))
+#define ADC_CR_ADEN_SHIFT       (0)
+#define ADC_CR_ADEN_MASK        (1 << (ADC_CR_ADEN_SHIFT))
+#define ADC_CR_ADEN_NO          (0 << (ADC_CR_ADEN_SHIFT))
+#define ADC_CR_ADEN_YES         (1 << (ADC_CR_ADEN_SHIFT))
+  __IO uint32_t         CFGR;           /* 0x0c */
+#define ADC_CFGR_CONT_SHIFT     (13)
+#define ADC_CFGR_CONT_MASK      (1 << (ADC_CFGR_CONT_SHIFT))
+#define ADC_CFGR_CONT_NO        (0 << (ADC_CFGR_CONT_SHIFT))
+#define ADC_CFGR_CONT_YES       (1 << (ADC_CFGR_CONT_SHIFT))
+#define ADC_CFGR_EXTEN_SHIFT    (10)
+#define ADC_CFGR_EXTEN_MASK     (3 << (ADC_CFGR_EXTEN_SHIFT))
+#define ADC_CFGR_EXTEN_DIS      (0 << (ADC_CFGR_EXTEN_SHIFT))
+#define ADC_CFGR_EXTEN_RISING   (1 << (ADC_CFGR_EXTEN_SHIFT))
+#define ADC_CFGR_EXTEN_FALLING  (2 << (ADC_CFGR_EXTEN_SHIFT))
+#define ADC_CFGR_EXTEN_BOTH     (3 << (ADC_CFGR_EXTEN_SHIFT))
+#define ADC_CFGR_EXTSEL_SHIFT   (6)
+#define ADC_CFGR_EXTSEL_MASK    (0xf << (ADC_CFGR_EXTSEL_SHIFT))
+#define ADC_CFGR_EXTSEL_VAL(x)  ((x << (ADC_CFGR_EXTSEL_SHIFT)) & ADC_CFGR_EXTSEL_MASK)
+#define ADC_CFGR_ALIGN_SHIFT    (5)
+#define ADC_CFGR_ALIGN_MASK     (1 << (ADC_CFGR_ALIGN_SHIFT))
+#define ADC_CFGR_ALIGN_NO       (0 << (ADC_CFGR_ALIGN_SHIFT))
+#define ADC_CFGR_ALIGN_YES      (1 << (ADC_CFGR_ALIGN_SHIFT))
+#define ADC_CFGR_RES_SHIFT      (3)
+#define ADC_CFGR_RES_MASK       (3 << (ADC_CFGR_RES_SHIFT))
+#define ADC_CFGR_RES_16BIT      (0 << (ADC_CFGR_RES_SHIFT))
+#define ADC_CFGR_RES_14BIT      (0 << (ADC_CFGR_RES_SHIFT))
+#define ADC_CFGR_RES_12BIT      (0 << (ADC_CFGR_RES_SHIFT))
+#define ADC_CFGR_RES_10BIT      (1 << (ADC_CFGR_RES_SHIFT))
+#define ADC_CFGR_RES_8BIT       (2 << (ADC_CFGR_RES_SHIFT))
+#define ADC_CFGR_RES_6BIT       (3 << (ADC_CFGR_RES_SHIFT))
+  /* DMNGT is not supported */
+#define ADC_CFGR_DMNGT_SHIFT    (0)
+#define ADC_CFGR_DMNGT_MASK     (7 << (ADC_CFGR_DMNGT_SHIFT))
+#define ADC_CFGR_DMNGT_REGULAR  (0 << (ADC_CFGR_DMNGT_SHIFT))
+#define ADC_CFGR_DMNGT_DMAONESHOT (0 << (ADC_CFGR_DMNGT_SHIFT))
+#define ADC_CFGR_DMNGT_DFSDM    (0 << (ADC_CFGR_DMNGT_SHIFT))
+#define ADC_CFGR_DMNGT_DMACIRC  (0 << (ADC_CFGR_DMNGT_SHIFT))
+
+  __IO uint32_t         CFGR2;          /* 0x10 */
+
+/* 0x14, 0x18 SMPR1, 2 */
+  __IO uint32_t         SMPR1;          /* 0x14 */
+  __IO uint32_t         SMPR2;          /* 0x18 */
+#define ADC_SMPR_SMP_SHIFT      (0)
+#define ADC_SMPR_SMP_MASK       (7 << (ADC_SMPR_SMP_SHIFT))
+#define ADC_SMPR_SMP_1_5CLKS    (0 << (ADC_SMPR_SMP_SHIFT))
+#define ADC_SMPR_SMP_2_5CLKS    (1 << (ADC_SMPR_SMP_SHIFT))
+#define ADC_SMPR_SMP_8_5CLKS    (2 << (ADC_SMPR_SMP_SHIFT))
+#define ADC_SMPR_SMP_16_5CLKS   (3 << (ADC_SMPR_SMP_SHIFT))
+#define ADC_SMPR_SMP_32_5CLKS   (4 << (ADC_SMPR_SMP_SHIFT))
+#define ADC_SMPR_SMP_64_5CLKS   (5 << (ADC_SMPR_SMP_SHIFT))
+#define ADC_SMPR_SMP_387_5CLKS  (6 << (ADC_SMPR_SMP_SHIFT))
+#define ADC_SMPR_SMP_810_5CLKS  (7 << (ADC_SMPR_SMP_SHIFT))
+
+  __IO uint32_t         PCSEL;          /* 0x1c */
+  __IO uint32_t         LTR1;           /* 0x20 */
+  __IO uint32_t         HTR1;           /* 0x24 */
+  uint32_t              reserved28[2];
+#define ADC_SQR1_L_SHIFT        (0)
+#define ADC_SQR1_L_MASK         (0xf << (ADC_SQR1_L_SHIFT))
+#define ADC_SQR1_L_VAL(x)       (((x) << (ADC_SQR1_L_SHIFT) & ADC_SQR1_L_MASK)
+#define ADC_SQR1_SQ1_SHIFT      (6)
+#define ADC_SQR1_SQ1_MASK       (0xf << (ADC_SQR1_SQ1_SHIFT))
+#define ADC_SQR1_SQ1_VAL(x)     (((x) << (ADC_SQR1_SQ1_SHIFT)) & ADC_SQR1_SQ1_MASK)
+#define ADC_SQR1_SQ2_SHIFT      (12)
+#define ADC_SQR1_SQ2_MASK       (0xf << (ADC_SQR1_SQ2_SHIFT))
+#define ADC_SQR1_SQ2_VAL(x)     (((x) << (ADC_SQR1_SQ2_SHIFT)) & ADC_SQR1_SQ2_MASK)
+  __IO uint32_t         SQR1;           /* 0x30 */
+  __IO uint32_t         SQR2;           /* 0x34 */
+  __IO uint32_t         SQR3;           /* 0x38 */
+  __IO uint32_t         SQR4;           /* 0x3c */
+  __IO uint32_t         DR;             /* 0x40 */
+  uint32_t              reserved44[7];
+  __IO uint32_t         OFR1;           /* 0x60 */
+  __IO uint32_t         OFR2;           /* 0x64 */
+  __IO uint32_t         OFR3;           /* 0x68 */
+  __IO uint32_t         OFR4;           /* 0x6c */
+  uint32_t              reserved70[12];
+  uint32_t              reservedA0[24];
+  uint32_t              reserved100[0x200/4];
+
+  __IO uint32_t         CSR;            /* 0x300 */
+  uint32_t              reserved304;
+
+  __IO uint32_t         CCR;            /* 0x308 */
+#define ADC_CCR_PRESC_SHIFT     (18)
+#define ADC_CCR_PRESC_MASK      (0xf << (ADC_CCR_PRESC_SHIFT))
+#define ADC_CCR_PRESC_DIV1      (0 << (ADC_CCR_PRESC_SHIFT))
+#define ADC_CCR_PRESC_DIV2      (1 << (ADC_CCR_PRESC_SHIFT))
+#define ADC_CCR_PRESC_DIV4      (2 << (ADC_CCR_PRESC_SHIFT))
+#define ADC_CCR_PRESC_DIV6      (3 << (ADC_CCR_PRESC_SHIFT))
+#define ADC_CCR_PRESC_DIV8      (4 << (ADC_CCR_PRESC_SHIFT))
+#define ADC_CCR_PRESC_DIV10     (5 << (ADC_CCR_PRESC_SHIFT))
+#define ADC_CCR_PRESC_DIV12     (6 << (ADC_CCR_PRESC_SHIFT))
+#define ADC_CCR_PRESC_DIV16     (7 << (ADC_CCR_PRESC_SHIFT))
+#define ADC_CCR_PRESC_DIV32     (8 << (ADC_CCR_PRESC_SHIFT))
+#define ADC_CCR_PRESC_DIV64     (9 << (ADC_CCR_PRESC_SHIFT))
+#define ADC_CCR_PRESC_DIV128    (10 << (ADC_CCR_PRESC_SHIFT))
+#define ADC_CCR_PRESC_DIV256    (11 << (ADC_CCR_PRESC_SHIFT))
+#define ADC_CCR_CKMODE_SHIFT    (16)
+#define ADC_CCR_CKMODE_MASK     (3 << (ADC_CCR_CKMODE_SHIFT))
+#define ADC_CCR_CKMODE_ASYNC    (0 << (ADC_CCR_CKMODE_SHIFT))
+#define ADC_CCR_CKMODE_HCLK_DIV1 (1 << (ADC_CCR_CKMODE_SHIFT))
+#define ADC_CCR_CKMODE_HCLK_DIV2 (2 << (ADC_CCR_CKMODE_SHIFT))
+#define ADC_CCR_CKMODE_HCLK_DIV4 (3 << (ADC_CCR_CKMODE_SHIFT))
+  /* CCR DUAL is not supported */
+#define ADC_CCR_DELAY_SHIFT     (8)
+#define ADC_CCR_DELAY_MASK      (0xf << (ADC_CCR_DELAY_SHIFT))
+#define ADC_CCR_DELAY_VAL(x)    (0)
+#define ADC_CCR_DUAL_SHIFT      (0)
+#define ADC_CCR_DUAL_MASK       (0x1f << (ADC_CCR_DUAL_SHIFT))
+#define ADC_CCR_DUAL_INDEPENDENT (0 << (ADC_CCR_DUAL_SHIFT))
+} stm32Dev_ADC;
+
+#define ADC1_PTR        ((stm32Dev_ADC *) ((AHB2_BASE) + 0x08040000))
+
+
+/*******************************************
+ * 17 DAC
+ */
 struct _stStm32l4_DAC {
   __IO uint32_t	cr;				/* 0x00 */
 #define CR_CEN2_SHIFT		30
