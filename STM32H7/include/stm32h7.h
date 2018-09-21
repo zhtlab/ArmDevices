@@ -981,13 +981,13 @@ typedef struct {
 #define SPI_SR_RXPCNT_SHIFT             (13)
 #define SPI_SR_RXPCNT_MASK              (1 << (SPI_SR_RXPCNT_SHIFT))
 #define SPI_SR_TXC_SHIFT                (12)
-#define SPI_SR_TXC_MASK                 (0 << (SPI_SR_TXC_SHIFT))
+#define SPI_SR_TXC_MASK                 (1 << (SPI_SR_TXC_SHIFT))
 #define SPI_SR_EOT_SHIFT                (3)
-#define SPI_SR_EOT_MASK                 (0 << (SPI_SR_EOT_SHIFT))
+#define SPI_SR_EOT_MASK                 (1 << (SPI_SR_EOT_SHIFT))
 #define SPI_SR_TXP_SHIFT                (1)
-#define SPI_SR_TXP_MASK                 (0 << (SPI_SR_TXP_SHIFT))
+#define SPI_SR_TXP_MASK                 (1 << (SPI_SR_TXP_SHIFT))
 #define SPI_SR_RXP_SHIFT                (0)
-#define SPI_SR_RXP_MASK                 (0 << (SPI_SR_RXP_SHIFT))
+#define SPI_SR_RXP_MASK                 (1 << (SPI_SR_RXP_SHIFT))
   __IO uint32_t         IFCR;           /* 0x18 */
 #define SPI_IFCR_CLEAR_ALL_SHIFT        (0)
 #define SPI_IFCR_CLEAR_ALL              (0x0ff8 << (SPI_IFCR_CLEAR_ALL_SHIFT))
@@ -1484,8 +1484,8 @@ typedef struct {
 #define USB_HS_MAX_PACKET_SIZE          512
 #define USB_SPEED_SUPER                 3
 #define USB_SPEED_HIGH                  2
-#define USB_SPEED_FULL                  1
-#define USB_SPEED_LOW                   0
+#define USB_SPEED_LOW                   1
+#define USB_SPEED_FULL                  0
 
 #define USB_MODULE_TBL                  {NULL, USB1_OTG_HS, USB2_OTG_FS}
 
