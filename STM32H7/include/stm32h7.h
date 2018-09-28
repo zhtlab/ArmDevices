@@ -577,10 +577,27 @@ typedef struct {
  */
 typedef struct {
   __IO uint32_t         ISR;            /* 0x00 */
+#define ADC_ISR_OVR_SHIFT       (4)
+#define ADC_ISR_OVR_MASK        (1 << (ADC_ISR_OVR_SHIFT))
+#define ADC_ISR_OVR_NO          (0 << (ADC_ISR_OVR_SHIFT))
+#define ADC_ISR_OVR_YES         (1 << (ADC_ISR_OVR_SHIFT))
+#define ADC_ISR_EOS_SHIFT       (3)
+#define ADC_ISR_EOS_MASK        (1 << (ADC_ISR_EOS_SHIFT))
+#define ADC_ISR_EOS_NO          (0 << (ADC_ISR_EOS_SHIFT))
+#define ADC_ISR_EOS_YES         (1 << (ADC_ISR_EOS_SHIFT))
+#define ADC_ISR_EOC_SHIFT       (2)
+#define ADC_ISR_EOC_MASK        (1 << (ADC_ISR_EOC_SHIFT))
+#define ADC_ISR_EOC_NO          (0 << (ADC_ISR_EOC_SHIFT))
+#define ADC_ISR_EOC_YES         (1 << (ADC_ISR_EOC_SHIFT))
+#define ADC_ISR_EOSMP_SHIFT     (1)
+#define ADC_ISR_EOSMP_MASK      (1 << (ADC_ISR_EOSMP_SHIFT))
+#define ADC_ISR_EOSMP_NO        (0 << (ADC_ISR_EOSMP_SHIFT))
+#define ADC_ISR_EOSMP_YES       (1 << (ADC_ISR_EOSMP_SHIFT))
 #define ADC_ISR_ADRDY_SHIFT     (0)
 #define ADC_ISR_ADRDY_MASK      (1 << (ADC_ISR_ADRDY_SHIFT))
 #define ADC_ISR_ADRDY_NO        (0 << (ADC_ISR_ADRDY_SHIFT))
 #define ADC_ISR_ADRDY_YES       (1 << (ADC_ISR_ADRDY_SHIFT))
+
   __IO uint32_t         IER;            /* 0x04 */
   __IO uint32_t         CR;             /* 0x08 */
 #define ADC_CR_DEEPPWD_SHIFT    (29)
@@ -660,6 +677,15 @@ typedef struct {
   __IO uint32_t         LTR1;           /* 0x20 */
   __IO uint32_t         HTR1;           /* 0x24 */
   uint32_t              reserved28[2];
+#define ADC_SQR1_L_SHIFT        (0)
+#define ADC_SQR1_L_MASK         (0xf << (ADC_SQR1_L_SHIFT))
+#define ADC_SQR1_L_VAL(x)       (((x) << (ADC_SQR1_L_SHIFT) & ADC_SQR1_L_MASK)
+#define ADC_SQR1_SQ1_SHIFT      (6)
+#define ADC_SQR1_SQ1_MASK       (0xf << (ADC_SQR1_SQ1_SHIFT))
+#define ADC_SQR1_SQ1_VAL(x)     (((x) << (ADC_SQR1_SQ1_SHIFT)) & ADC_SQR1_SQ1_MASK)
+#define ADC_SQR1_SQ2_SHIFT      (12)
+#define ADC_SQR1_SQ2_MASK       (0xf << (ADC_SQR1_SQ2_SHIFT))
+#define ADC_SQR1_SQ2_VAL(x)     (((x) << (ADC_SQR1_SQ2_SHIFT)) & ADC_SQR1_SQ2_MASK)
   __IO uint32_t         SQR1;           /* 0x30 */
   __IO uint32_t         SQR2;           /* 0x34 */
   __IO uint32_t         SQR3;           /* 0x38 */
@@ -1014,6 +1040,8 @@ typedef struct {
 /*******************************************
  * 57 USB
  */
+#define USB_EPOUT_MAX_COUNT       8
+#define USB_EPIN_MAX_COUNT        8
 typedef struct {
   __IO uint32_t         CTL;
 #define USB_EPCTL_EPENA_SHIFT   (31)
@@ -1024,6 +1052,9 @@ typedef struct {
 #define USB_EPCTL_EPDIS_MASK    (1 << (USB_EPCTL_EPDIS_SHIFT))
 #define USB_EPCTL_EPDIS_NO      (0 << (USB_EPCTL_EPDIS_SHIFT))
 #define USB_EPCTL_EPDIS_YES     (1 << (USB_EPCTL_EPDIS_SHIFT))
+#define USB_EPCTL_SD1PID_SODDFRM_SHIFT  (29)
+#define USB_EPCTL_SD1PID_SODDFRM_MASK   (1 << (USB_EPCTL_SD1PID_SODDFRM_SHIFT))
+#define USB_EPCTL_SD1PID_SODDFRM        (1 << (USB_EPCTL_SD1PID_SODDFRM_SHIFT))
 #define USB_EPCTL_SD0PID_SEVNFRM_SHIFT  (28)
 #define USB_EPCTL_SD0PID_SEVNFRM_MASK   (1 << (USB_EPCTL_SD0PID_SEVNFRM_SHIFT))
 #define USB_EPCTL_SD0PID_SEVNFRM        (1 << (USB_EPCTL_SD0PID_SEVNFRM_SHIFT))
@@ -1050,18 +1081,20 @@ typedef struct {
 #define USB_EPCTL_USBAEP_MASK   (1 << (USB_EPCTL_USBAEP_SHIFT))
 #define USB_EPCTL_USBAEP_NO     (0 << (USB_EPCTL_USBAEP_SHIFT))
 #define USB_EPCTL_USBAEP_YES    (1 << (USB_EPCTL_USBAEP_SHIFT))
-#define USB_EPCTL_MPSIZ_SHIFT   (22)
+#define USB_EPCTL_MPSIZ_SHIFT   (0)
 #define USB_EPCTL_MPSIZ_MASK    (0x3ff << (USB_EPCTL_MPSIZ_SHIFT))
 #define USB_EPCTL_MPSIZ_VAL(x)  ((x) << (USB_EPCTL_MPSIZ_SHIFT))
 
   uint32_t              reserved04;
-  __IO uint32_t         INT;
+  __IO uint32_t         INT;            /* 0x08 */
+#define USB_EPINT_NAK_SHIFT     (13)
+#define USB_EPINT_NAK_MASK      (1 << (USB_EPINT_NAK_SHIFT))
 #define USB_EPINT_TXFE_SHIFT    (7)
 #define USB_EPINT_TXFE_MASK     (1 << (USB_EPINT_TXFE_SHIFT))
-#define USB_EPINT_B2BSTUP_SHIFT    (6)
-#define USB_EPINT_B2BSTUP_MASK     (1 << (USB_EPINT_B2BSTUP_SHIFT))
-#define USB_EPINT_STSPHSRX_SHIFT   (5)
-#define USB_EPINT_STSPHSRX_MASK    (1 << (USB_EPINT_STSPHSRX_SHIFT))
+#define USB_EPINT_B2BSTUP_SHIFT (6)
+#define USB_EPINT_B2BSTUP_MASK  (1 << (USB_EPINT_B2BSTUP_SHIFT))
+#define USB_EPINT_STSPHSRX_SHIFT (5)
+#define USB_EPINT_STSPHSRX_MASK  (1 << (USB_EPINT_STSPHSRX_SHIFT))
 #define USB_EPINT_OTEPDIS_SHIFT (4)
 #define USB_EPINT_OTEPDIS_MASK  (1 << (USB_EPINT_OTEPDIS_SHIFT))
 #define USB_EPINT_STUP_SHIFT    (3)
@@ -1072,12 +1105,19 @@ typedef struct {
 #define USB_EPINT_XFRC_MASK     (1 << (USB_EPINT_XFRC_SHIFT))
 
   uint32_t              reserved0c;
-  __IO uint32_t         SIZ;
+  __IO uint32_t         SIZ;            /* 0x10 */
+  /* STUPCNT is for SETUP OUT packet */
 #define USB_EPSIZ_STUPCNT_SHIFT (29)
 #define USB_EPSIZ_STUPCNT_MASK  (3 << (USB_EPSIZ_STUPCNT_SHIFT))
 #define USB_EPSIZ_STUPCNT_1PKTS (1 << (USB_EPSIZ_STUPCNT_SHIFT))
 #define USB_EPSIZ_STUPCNT_2PKTS (2 << (USB_EPSIZ_STUPCNT_SHIFT))
 #define USB_EPSIZ_STUPCNT_3PKTS (3 << (USB_EPSIZ_STUPCNT_SHIFT))
+  /* MCNT is for IN packet and EP1,2, ... */
+#define USB_EPSIZ_MCNT_SHIFT    (29)
+#define USB_EPSIZ_MCNT_MASK     (3 << (USB_EPSIZ_MCNT_SHIFT))
+#define USB_EPSIZ_MCNT_1PKTS    (1 << (USB_EPSIZ_MCNT_SHIFT))
+#define USB_EPSIZ_MCNT_2PKTS    (2 << (USB_EPSIZ_MCNT_SHIFT))
+#define USB_EPSIZ_MCNT_3PKTS    (3 << (USB_EPSIZ_MCNT_SHIFT))
 #define USB_EPSIZ_PKTCNT_SHIFT  (19)
 #define USB_EPSIZ_PKTCNT_MASK   (1 << (USB_EPSIZ_PKTCNT_SHIFT))
 #define USB_EPSIZ_PKTCNT_ZERO   (0 << (USB_EPSIZ_PKTCNT_SHIFT))
@@ -1087,8 +1127,8 @@ typedef struct {
 #define USB_EPSIZ_XFRSIZ_SHIFT  (0)
 #define USB_EPSIZ_XFRSIZ_MASK   (0x7f << (USB_EPSIZ_XFRSIZ_SHIFT))
 #define USB_EPSIZ_XFRSIZ_VAL(x) (((x) << (USB_EPSIZ_XFRSIZ_SHIFT)) & (USB_EPSIZ_XFRSIZ_MASK))
-  __IO uint32_t         DMA;            /* out only */
-  __IO uint32_t         STS;            /* in only */
+  __IO uint32_t         DMA;            /* 0x14  out only */
+  __IO uint32_t         STS;            /* 0x18  in only */
   uint32_t              reserved1c;
 } stm32Usb320aDevEp_t;
 
@@ -1164,13 +1204,12 @@ typedef struct {
 #define USB_GINTSTS_LPMINT_SHIFT        (27)
 #define USB_GINTSTS_LPMINT_MASK         (1 << (USB_GINTSTS_LPMINT_SHIFT))
 #define USB_GINTSTS_LPMINT_EN           (1 << (USB_GINTSTS_LPMINT_SHIFT))
-#define USB_GINTSTS_RXFLVL_SHIFT        (4)
-#define USB_GINTSTS_RXFLVL_MASK         (1 << (USB_GINTSTS_RXFLVL_SHIFT))
-#define USB_GINTSTS_RXFLVL_EN           (1 << (USB_GINTSTS_RXFLVL_SHIFT))
-
-#define USB_GINTSTS_PXFRM_IISOOXFR_SHIFT      (20)
+#define USB_GINTSTS_PXFRM_IISOOXFR_SHIFT      (21)
 #define USB_GINTSTS_PXFRM_IISOOXFR_MASK       (1 << (USB_GINTSTS_PXFRM_IISOOXFR_SHIFT))
 #define USB_GINTSTS_PXFRM_IISOOXFR_EN         (1 << (USB_GINTSTS_PXFRM_IISOOXFR_SHIFT))
+#define USB_GINTSTS_IISOIXFR_SHIFT      (20)
+#define USB_GINTSTS_IISOIXFR_MASK       (1 << (USB_GINTSTS_IISOIXFR_SHIFT))
+#define USB_GINTSTS_IISOIXFR_EN         (1 << (USB_GINTSTS_IISOIXFR_SHIFT))
 #define USB_GINTSTS_OEPINT_SHIFT        (19)
 #define USB_GINTSTS_OEPINT_MASK         (1 << (USB_GINTSTS_OEPINT_SHIFT))
 #define USB_GINTSTS_OEPINT_EN           (1 << (USB_GINTSTS_OEPINT_SHIFT))
@@ -1190,6 +1229,9 @@ typedef struct {
 #define USB_GINTSTS_ESUSP_SHIFT         (10)
 #define USB_GINTSTS_ESUSP_MASK          (1 << (USB_GINTSTS_ESUSP_SHIFT))
 #define USB_GINTSTS_ESUSP_EN            (1 << (USB_GINTSTS_ESUSP_SHIFT))
+#define USB_GINTSTS_RXFLVL_SHIFT        (4)
+#define USB_GINTSTS_RXFLVL_MASK         (1 << (USB_GINTSTS_RXFLVL_SHIFT))
+#define USB_GINTSTS_RXFLVL_EN           (1 << (USB_GINTSTS_RXFLVL_SHIFT))
 #define USB_GINTSTS_SOF_SHIFT           (3)
 #define USB_GINTSTS_SOF_MASK            (1 << (USB_GINTSTS_SOF_SHIFT))
 #define USB_GINTSTS_SOF_EN              (1 << (USB_GINTSTS_SOF_SHIFT))
@@ -1320,8 +1362,22 @@ typedef struct {
 #define USB_DCFG_DSPD_FS                (3 << (USB_DCFG_DSPD_SHIFT))
 
   __IO uint32_t         DCTL;
+#define USB_DCTL_CGONAK_SHIFT           (10)
+#define USB_DCTL_CGONAK_MASK            (1 << (USB_DCTL_CGONAK_SHIFT))
+#define USB_DCTL_CGONAK_HIGH            (0 << (USB_DCTL_CGONAK_SHIFT))
+#define USB_DCTL_CGONAK_FULL            (1 << (USB_DCTL_CGONAK_SHIFT))
+#define USB_DCTL_SGONAK_SHIFT           (9)
+#define USB_DCTL_SGONAK_MASK            (1 << (USB_DCTL_SGONAK_SHIFT))
+#define USB_DCTL_SGONAK_HIGH            (0 << (USB_DCTL_SGONAK_SHIFT))
+#define USB_DCTL_SGONAK_FULL            (1 << (USB_DCTL_SGONAK_SHIFT))
 #define USB_DCTL_CGINAK_SHIFT           (8)
 #define USB_DCTL_CGINAK_MASK            (1 << (USB_DCTL_CGINAK_SHIFT))
+#define USB_DCTL_CGINAK_HIGH            (0 << (USB_DCTL_CGINAK_SHIFT))
+#define USB_DCTL_CGINAK_FULL            (1 << (USB_DCTL_CGINAK_SHIFT))
+#define USB_DCTL_SGINAK_SHIFT           (7)
+#define USB_DCTL_SGINAK_MASK            (1 << (USB_DCTL_SGINAK_SHIFT))
+#define USB_DCTL_SGINAK_HIGH            (0 << (USB_DCTL_SGINAK_SHIFT))
+#define USB_DCTL_SGINAK_FULL            (1 << (USB_DCTL_SGINAK_SHIFT))
 #define USB_DCTL_SDIS_SHIFT             (1)
 #define USB_DCTL_SDIS_MASK              (1 << (USB_DCTL_SDIS_SHIFT))
 #define USB_DCTL_SDIS_CONNECT           (0 << (USB_DCTL_SDIS_SHIFT))
@@ -1330,23 +1386,11 @@ typedef struct {
 #define USB_DCTL_RWUSIG_MASK            (1 << (USB_DCTL_RWUSIG_SHIFT))
 #define USB_DCTL_RWUSIG_CONNECT         (0 << (USB_DCTL_RWUSIG_SHIFT))
 #define USB_DCTL_RWUSIG_DISCONNECT      (1 << (USB_DCTL_RWUSIG_SHIFT))
+
   __IO uint32_t         DSTS;
-#define USB_DSTS_CGONAK_SHIFT           (10)
-#define USB_DSTS_CGONAK_MASK            (1 << (USB_DSTS_CGONAK_SHIFT))
-#define USB_DSTS_CGONAK_HIGH            (0 << (USB_DSTS_CGONAK_SHIFT))
-#define USB_DSTS_CGONAK_FULL            (1 << (USB_DSTS_CGONAK_SHIFT))
-#define USB_DSTS_SGONAK_SHIFT           (9)
-#define USB_DSTS_SGONAK_MASK            (1 << (USB_DSTS_SGONAK_SHIFT))
-#define USB_DSTS_SGONAK_HIGH            (0 << (USB_DSTS_SGONAK_SHIFT))
-#define USB_DSTS_SGONAK_FULL            (1 << (USB_DSTS_SGONAK_SHIFT))
-#define USB_DSTS_CGINAK_SHIFT           (8)
-#define USB_DSTS_CGINAK_MASK            (1 << (USB_DSTS_CGINAK_SHIFT))
-#define USB_DSTS_CGINAK_HIGH            (0 << (USB_DSTS_CGINAK_SHIFT))
-#define USB_DSTS_CGINAK_FULL            (1 << (USB_DSTS_CGINAK_SHIFT))
-#define USB_DSTS_SGINAK_SHIFT           (7)
-#define USB_DSTS_SGINAK_MASK            (1 << (USB_DSTS_SGINAK_SHIFT))
-#define USB_DSTS_SGINAK_HIGH            (0 << (USB_DSTS_SGINAK_SHIFT))
-#define USB_DSTS_SGINAK_FULL            (1 << (USB_DSTS_SGINAK_SHIFT))
+#define USB_DSTS_FNSOF_SHIFT            (8)
+#define USB_DSTS_FNSOF_MASK             (0x3ff << (USB_DSTS_FNSOF_SHIFT))
+#define USB_DSTS_FNSOF_LSB_MASK         (1     << (USB_DSTS_FNSOF_SHIFT))
 #define USB_DSTS_EERR_SHIFT             (3)
 #define USB_DSTS_EERR_MASK              (1 << (USB_DSTS_EERR_SHIFT))
 #define USB_DSTS_EERR_NO                (0 << (USB_DSTS_EERR_SHIFT))
