@@ -117,6 +117,6 @@ static int      DevUsbConnect(devUsbSc_t *psc);
 
 #endif
 
-void     DevUsbDebugShowGeneralReg(stm32Usb320aDev_t *p);
+void     DevUsbDebugShowGeneralReg(stm32Usb320aDev_t *p, int num);
 
 #endif

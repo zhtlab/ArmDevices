@@ -36,6 +36,9 @@
 
 #include        "devUsb320a.h"
 
+#define DEVUSB_INCOMPLETE_ISO_INTR_EN           0
+
+
 struct _stDevUsb           devUsb;
 
 
@@ -141,7 +144,7 @@ DevUsbInit(int unit, devUsbParam_t *param)
   p->DAINT   = -1;
   p->DAINTMSK = 0;
 
-  for (i = 0; i < 9; i++) {
+  for (i = 0; i < USB_EPIN_COUNTS; i++) {
     if((p->in[i].CTL & USB_EPCTL_EPENA_MASK) == USB_EPCTL_EPENA_YES) {
       p->in[i].CTL = (USB_EPCTL_EPDIS_YES | USB_EPCTL_SNAK);
     } else {
@@ -152,7 +155,7 @@ DevUsbInit(int unit, devUsbParam_t *param)
     p->in[i].INT = -1;
   }
 
-  for (i = 0; i < 9; i++) {
+  for (i = 0; i < USB_EPOUT_COUNTS; i++) {
     if((p->out[i].CTL & USB_EPCTL_EPENA_MASK) == USB_EPCTL_EPENA_YES) {
       p->out[i].CTL = (USB_EPCTL_EPDIS_YES | USB_EPCTL_SNAK);
     } else {
@@ -181,8 +184,11 @@ DevUsbInit(int unit, devUsbParam_t *param)
   /* enable interrupt for to manage the usb device behavior */
   p->GINTMSK = (USB_GINTSTS_USBSUSP_EN | USB_GINTSTS_USBRST_EN | \
                 USB_GINTSTS_ENUMDNE_EN | USB_GINTSTS_IEPINT_EN | \
-                USB_GINTSTS_OEPINT_EN  | /*USB_GINTSTS_IISOIXFR_EN|*/ \
-                /*USB_GINTSTS_PXFRM_IISOOXFR_EN |*/ USB_GINTSTS_WKUINT_EN);
+                USB_GINTSTS_OEPINT_EN  |
+#if DEVUSB_INCOMPLETE_ISO_INTR_EN
+                USB_GINTSTS_IISOIXFR_EN| USB_GINTSTS_PXFRM_IISOOXFR_EN |
+#endif
+                USB_GINTSTS_WKUINT_EN);
   /* enable receive fifo not empty interrupt */
   if(!param->dma) p->GINTMSK |= USB_GINTSTS_RXFLVL_EN;
   if(param->sof)  p->GINTMSK |= USB_GINTSTS_SOF_EN;
@@ -240,9 +246,8 @@ DevUsbOpenEp(int unit, int epnum, int eptype, int size)
     p->out[num].CTL |= ( (USB_EPCTL_SD0PID_SEVNFRM) |
                          type |
                          (USB_EPCTL_USBAEP_YES) |
-                         0x40);
+                         size);
     p->DAINTMSK |= USB_DAINT_OEPINT_BIT(num);
-    printf("XXXX %x\r\n", p->DAINTMSK);
   }
 
   return 0;
@@ -322,13 +327,6 @@ DevUsbPrepareReceive(int unit, int epnum, const uint8_t *ptr, int size)
   psc->out[num].size = size;
   psc->out[num].cnt  = 0;
 
-#if 0
-  if(size > psc->out[num].maxsize) size = psc->out[num].maxsize;
-
-  p->out[num].SIZ  = (USB_EPSIZ_STUPCNT_1PKTS | USB_EPSIZ_PKTCNT_ONE |
-                      USB_EPSIZ_XFRSIZ_VAL(size));
-  p->out[num].CTL  |= (USB_EPCTL_CNAK | USB_EPCTL_EPENA_YES);
-#endif
   DevUsbStartPacketOut(psc, epnum);
 
   return 0;
@@ -480,8 +478,10 @@ DevUsbInterrupt(devUsbSc_t *psc)
     /* clear all epin fifos */
     DevUsbFlushFifoTx(psc, USB_GRSTCTL_TXFNUM_ALL >> USB_GRSTCTL_TXFNUM_SHIFT);
 
-    for (i = 0; i < /*psc->epMax*/ 15 ; i++) {   /* adhoc */
+    for (i = 0; i < USB_EPIN_COUNTS; i++) {
       p->in[i].INT  = -1;
+    }
+    for (i = 0; i < USB_EPOUT_COUNTS; i++) {
       p->out[i].INT = -1;
     }
     p->DAINT = -1;
@@ -493,8 +493,10 @@ DevUsbInterrupt(devUsbSc_t *psc)
     /* Set Default Address to 0 */
     p->DCFG &= ~USB_DCFG_DAD_MASK;
 
+#if 0
     /* setup EP0 to receive SETUP packets */
     DevUsbEpOutEnable(psc, 0, (uint8_t *)&psc->setup);
+#endif
   }
 
 
@@ -514,15 +516,17 @@ DevUsbInterrupt(devUsbSc_t *psc)
     p->GOTGINT |= temp;
   }
 
-#if 0
+#if DEVUSB_INCOMPLETE_ISO_INTR_EN
     /* Handle Incomplete ISO IN Interrupt */
-  if(intr & USB_GINTSTS_IISOIXFR) {
-    xxx_IsoInIncompleteCallback(hpcd, epnum);
+  if(intr & USB_GINTSTS_IISOIXFR_MASK) {
+    printf("devusb intr incomplete isoin\r\n");
+    /*xxx_IsoInIncompleteCallback(hpcd, epnum);*/
   }
 
   /* Handle Incomplete ISO OUT Interrupt */
-  if(intr & USB_GINTSTS_PXFR_INCOMPISOOUT) {
-    xxx_IsoOutIncompleteCallback(hpcd, epnum);
+  if(intr & USB_GINTSTS_PXFRM_IISOOXFR_MASK) {
+    printf("devusb intr incomplete isoout\r\n");
+    /*xxx_IsoOutIncompleteCallback(hpcd, epnum);*/
   }
 #endif
 
@@ -648,8 +652,10 @@ DevUsbInterruptEpOut(devUsbSc_t *psc)
 
           if(epnum == 0) {
             if(psc->out[epnum].size == 0) {
+#if 0
               /* this is ZLP, so prepare EP0 for next setup */
               DevUsbEpOutEnable(psc, 0, (uint8_t *)&psc->setup);
+#endif
             } else {
               if(psc->waitSetupPayload) {
                 DevUsbTransmit(psc->unit, epnum, NULL, 0);
@@ -667,8 +673,6 @@ DevUsbInterruptEpOut(devUsbSc_t *psc)
             } else {
               /*UsbdcoreCbDataOut(psc->unit, epnum, size);*/
             }
-          } else {
-            printf("devusb xxx out xfrc %x\n", epnum);
           }
         }
       }
@@ -792,7 +796,7 @@ DevUsbInterruptRecvData(devUsbSc_t *psc)
 
   uint32_t              val;
   uint32_t              size;
-  uint32_t              epnum;
+  uint32_t              num;
 
   devUsbEp_t            *ep;
   uint32_t              *ptr;
@@ -804,11 +808,9 @@ DevUsbInterruptRecvData(devUsbSc_t *psc)
   p->GINTMSK &= ~USB_GINTSTS_RXFLVL_MASK;        /* mask intr */
 
   val = p->GRXSTSP;
-  epnum = (val & USB_GRXSTSP_EPNUM_MASK) >>  USB_GRXSTSP_EPNUM_SHIFT;
-  size  = (val & USB_GRXSTSP_BCNT_MASK)  >>  USB_GRXSTSP_BCNT_SHIFT;
-  ep = &psc->out[epnum];
-
-  if(epnum > 0) printf("XXXXX %x %x\r\n", epnum, size);
+  num   = (val & USB_GRXSTSP_EPNUM_MASK) >> USB_GRXSTSP_EPNUM_SHIFT;
+  size  = (val & USB_GRXSTSP_BCNT_MASK)  >> USB_GRXSTSP_BCNT_SHIFT;
+  ep = &psc->out[num];
 
   if(size > ep->size) size = ep->size;
 
@@ -824,17 +826,21 @@ DevUsbInterruptRecvData(devUsbSc_t *psc)
 
     }
 
-    if(ep->cnt < ep->maxsize) {
-      UsbdcoreCbDataOut(psc->unit, epnum, size);
-      if(epnum == 3) printf("devusb recv 1 %x\r\n", size);
-    } else if(ep->cnt >= ep->size) {
-      UsbdcoreCbDataOut(psc->unit, epnum, ep->size);
-      if(epnum == 3) printf("devusb recv 2 %x\r\n", ep->size);
+    if((p->out[num].CTL & USB_EPCTL_EPTYP_MASK) == USB_EPCTL_EPTYP_ISOC) {
+      UsbdcoreCbDataOut(psc->unit, num, size);
+
     } else {
-      p->out[epnum].SIZ  = (USB_EPSIZ_PKTCNT_ONE | USB_EPSIZ_XFRSIZ_VAL(ep->maxsize));
-      p->out[epnum].CTL  |= (USB_EPCTL_CNAK | USB_EPCTL_EPENA_YES);
+      if(ep->cnt < ep->maxsize) {
+        UsbdcoreCbDataOut(psc->unit, num, size);
+      } else if(ep->cnt >= ep->size) {
+        UsbdcoreCbDataOut(psc->unit, num, ep->size);
+      } else {
+        /*p->out[num].SIZ  = (USB_EPSIZ_PKTCNT_ONE | USB_EPSIZ_XFRSIZ_VAL(ep->maxsize));*/
+        p->out[num].CTL  |= (USB_EPCTL_CNAK | USB_EPCTL_EPENA_YES);
+      }
     }
     break;
+
   case  USB_GRXSTSP_PKTSTS_SETUP_RECV:
     ptr = (uint32_t *)&psc->setup;
     ptr[0] = p->DFIFO[0][0];
@@ -974,6 +980,7 @@ DevUsbFlushFifoTx(devUsbSc_t *psc, int num)
 }
 
 
+#if 0
 static int
 DevUsbEpOutEnable(devUsbSc_t *psc, int epnum, uint8_t *ptr)
 {
@@ -981,21 +988,27 @@ DevUsbEpOutEnable(devUsbSc_t *psc, int epnum, uint8_t *ptr)
 
   stm32Usb320aDev_t     *p;
   uint32_t              val;
+  int                   num;
 
-  epnum &= 0x7f;
+  num = epnum & 0x7f;
 
   p = psc->dev;
 
-  p->out[epnum].SIZ  = (USB_EPSIZ_STUPCNT_1PKTS | USB_EPSIZ_PKTCNT_ONE |
+  if(num == 0) {
+    p->out[num].SIZ  = (USB_EPSIZ_STUPCNT_1PKTS | USB_EPSIZ_PKTCNT_ONE |
                         USB_EPSIZ_XFRSIZ_VAL(3*8));
+  } else {
+    /*p->out[num].SIZ  = (USB_EPSIZ_PKTCNT_ONE | USB_EPSIZ_XFRSIZ_VAL(0x40));*/
+  }
 
   if(psc->dma) {
-    p->out[epnum].DMA = (uint32_t)ptr;
-    p->out[epnum].CTL = USB_EPCTL_EPENA_YES | USB_EPCTL_USBAEP_YES;
+    p->out[num].DMA = (uint32_t)ptr;
+    p->out[num].CTL = USB_EPCTL_EPENA_YES | USB_EPCTL_USBAEP_YES;
   }
 
   return result;
 }
+#endif
 
 
 static int
@@ -1097,7 +1110,7 @@ DevUsbStartPacketOut(devUsbSc_t *psc, int epnum)
   stm32Usb320aDev_t     *p;
   int                   size;
   int                   num;
-  uint32_t              ctl;
+  uint32_t              ctl = 0, siz = 0;
 
   num = epnum & 0x7f;
   /*if(psc->in[num].fSent) goto end;*/
@@ -1108,16 +1121,20 @@ DevUsbStartPacketOut(devUsbSc_t *psc, int epnum)
   ctl = USB_EPCTL_CNAK | USB_EPCTL_EPENA_YES;
 
   if((p->out[num].CTL & USB_EPCTL_EPTYP_MASK) == USB_EPCTL_EPTYP_ISOC) {
-    if ((p->DSTS & USB_DSTS_FNSOF_LSB_MASK) == 0) {
-      p->out[num].CTL |= USB_EPCTL_SD1PID_SODDFRM;
+    if((p->DSTS & USB_DSTS_FNSOF_LSB_MASK) == 0) {
+      ctl |= USB_EPCTL_SD1PID_SODDFRM;
     } else {
-      p->out[num].CTL |= USB_EPCTL_SD0PID_SEVNFRM;
+      ctl |= USB_EPCTL_SD0PID_SEVNFRM;
     }
   }
 
-  p->out[num].SIZ  = (USB_EPSIZ_STUPCNT_1PKTS | USB_EPSIZ_PKTCNT_ONE |
-                      USB_EPSIZ_XFRSIZ_VAL(size));
-  p->out[num].CTL  |= ctl;
+  siz = USB_EPSIZ_PKTCNT_ONE;
+  if(num == 0) {
+    siz |= USB_EPSIZ_STUPCNT_1PKTS;
+  }
+
+  p->out[num].SIZ  = siz;
+  p->out[num].CTL |= ctl;
 
 end:
   return 0;
@@ -1248,20 +1265,19 @@ DevUsbDisconnect(devUsbSc_t *psc)
 
 
 void
-DevUsbDebugShowGeneralReg(stm32Usb320aDev_t *p)
+DevUsbDebugShowGeneralReg(stm32Usb320aDev_t *p, int num)
 {
-
   printf("GOTGCTL  %x %x %x %x %x %x %x\r\n", p->GOTGCTL, p->GOTGINT, p->GAHBCFG, p->GUSBCFG, p->GRSTCTL, p->GINTSTS, p->GINTMSK);
   printf("GRXSTSR  %x %x %x\r\n", p->GRXSTSR, p->GRXFSIZ, p->DIEPTXF0_HNPTXFSIZ);
-  printf("HNPTXSTS %x %x %x %x %x %x %x\r\n", p->HNPTXSTS, p->GI2CCTL, p->GCCFG, p->CID, p->GLPMCFG, p->HPTXFSIZ, p->DIEPTXF[0]);
+  printf("HNPTXSTS %x %x %x %x %x %x %x\r\n", p->HNPTXSTS, p->GI2CCTL, p->GCCFG, p->CID, p->GLPMCFG, p->HPTXFSIZ, p->DIEPTXF[num]);
 
   printf("DCFG     %x %x %x %x %x %x %x\r\n", p->DCFG, p->DCTL, p->DSTS, p->DIEPMSK, p->DOEPMSK, p->DAINT, p->DAINTMSK);
   printf("DVBUSDIS %x %x %x %x %x %x\r\n", p->DVBUSDIS, p->DVBUSPULSE, p->DTHRCTL, p->DIEPEMPMSK, p->DEACHINT, p->DEACHINTMSK);
-  printf("in[]     %x %x %x %x %x\r\n", p->in[0].CTL, p->in[0].INT, p->in[0].SIZ, p->in[0].DMA, p->in[0].STS);
-  printf("out[]    %x %x %x %x %x\r\n", p->out[0].CTL, p->out[0].INT, p->out[0].SIZ, p->out[0].DMA, p->out[0].STS);
+  printf("in[]     %x %x %x %x %x\r\n", p->in[num].CTL, p->in[num].INT, p->in[num].SIZ, p->in[num].DMA, p->in[num].STS);
+  printf("out[]    %x %x %x %x %x\r\n", p->out[num].CTL, p->out[num].INT, p->out[num].SIZ, p->out[num].DMA, p->out[num].STS);
 
-  printf("in[]     %x %x %x %x %x\r\n", &p->in[0].CTL, &p->in[0].INT, &p->in[0].SIZ, &p->in[0].DMA, &p->in[0].STS);
-  printf("out[]    %x %x %x %x %x\r\n", &p->out[0].CTL, &p->out[0].INT, &p->out[0].SIZ, &p->out[0].DMA, &p->out[0].STS);
+  printf("in[]     %x %x %x %x %x\r\n", &p->in[num].CTL, &p->in[num].INT, &p->in[num].SIZ, &p->in[num].DMA, &p->in[num].STS);
+  printf("out[]    %x %x %x %x %x\r\n", &p->out[num].CTL, &p->out[num].INT, &p->out[num].SIZ, &p->out[num].DMA, &p->out[num].STS);
 
   return;
 }
