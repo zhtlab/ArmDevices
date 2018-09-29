@@ -1040,8 +1040,8 @@ typedef struct {
 /*******************************************
  * 57 USB
  */
-#define USB_EPOUT_MAX_COUNT       8
-#define USB_EPIN_MAX_COUNT        8
+#define USB_EPOUT_COUNTS        9     /* max number of ep  plus 1 */
+#define USB_EPIN_COUNTS         9     /* max number of ep  plus 1 */
 typedef struct {
   __IO uint32_t         CTL;
 #define USB_EPCTL_EPENA_SHIFT   (31)
