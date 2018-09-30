@@ -58,8 +58,14 @@ DevCounterInit(int unit, devCounterParam_t *param)
 #ifdef TIM3_PTR
     counter.sc[3].dev  = TIM3_PTR;
 #endif
-#ifdef TIM3_PTR
+#ifdef TIM4_PTR
     counter.sc[4].dev  = TIM4_PTR;
+#endif
+#ifdef TIM5_PTR
+    counter.sc[5].dev  = TIM5_PTR;
+#endif
+#ifdef TIM8_PTR
+    counter.sc[8].dev  = TIM8_PTR;
 #endif
 #ifdef TIM15_PTR
     counter.sc[15].dev = TIM15_PTR;
