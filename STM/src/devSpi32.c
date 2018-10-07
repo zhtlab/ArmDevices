@@ -33,6 +33,12 @@
 
 struct _stSpi         spi;
 
+/**
+  * @brief  initilize the devcie
+  * @param  unit   unit number
+  * @param  param  the pointer of initialize parameters
+  * @retval int  0: success
+  */
 int
 DevSpiInit(int unit, devSpiParam_t *param)
 {
@@ -103,6 +109,13 @@ end:
 fail:
   return result;
 }
+
+
+/**
+  * @brief  interrupt process routine
+  * @param  unit   unit number
+  * @retval none
+  */
 static void
 DevSpiInterrupt(int unit)
 {
@@ -117,17 +130,34 @@ fail:
 
   return;
 }
+/**
+  * @brief  interrupt entry point for unit 4
+  * @param  noen
+  * @retval none
+  */
 void
 DevSpi4Interrupt(void)
 {
   DevSpiInterrupt(4);
 }
+/**
+  * @brief  interrupt entry point for unit 5
+  * @param  noen
+  * @retval none
+  */
 void
 DevSpi5Interrupt(void)
 {
   DevSpiInterrupt(5);
 }
 
+/**
+  * @brief  send routine
+  * @param  unit  unit number
+  * @param  ptr   the pointer of send data
+  * @param  size  send data size
+  * @retval result  success/fail
+  */
 int
 DevSpiSend(int unit, uint8_t *ptr, int size)
 {
@@ -147,6 +177,13 @@ DevSpiSend(int unit, uint8_t *ptr, int size)
 fail:
   return result;
 }
+/**
+  * @brief  recv routine
+  * @param  unit  unit number
+  * @param  ptr   the pointer of send data
+  * @param  size  recv buffer size
+  * @retval size  size of recv
+  */
 int
 DevSpiRecv(int unit, uint8_t *ptr, int size)
 {
@@ -170,6 +207,13 @@ fail:
 /*********************************
  * pio
  */
+/**
+  * @brief  send routine PIO
+  * @param  psc   pointer of internal descriptor
+  * @param  ptr   the pointer of send data
+  * @param  size  send data size
+  * @retval result  sent size
+  */
 static int
 DevSpiSendPio(devSpiSc_t *psc, uint8_t *ptr, int size)
 {
@@ -205,6 +249,13 @@ DevSpiSendPio(devSpiSc_t *psc, uint8_t *ptr, int size)
 fail:
   return sz;
 }
+/**
+  * @brief  recv routine PIO
+  * @param  psc   pointer of internal descriptor
+  * @param  ptr   the pointer of send data
+  * @param  size  recv buffer size
+  * @retval size  size of recv
+  */
 static int
 DevSpiRecvPio(devSpiSc_t *psc, uint8_t *ptr, int size)
 {
@@ -262,6 +313,13 @@ fail:
  */
 const static uint8_t    devSpiSendDmaModuleTbl[] = DMAMUX_MODULE_SPITX_TBL;
 const static uint8_t    devSpiSendDmaReqTbl[]    = DMAMUX_REQ_SPITX_TBL;
+/**
+  * @brief  send routine DMA
+  * @param  psc   pointer of internal descriptor
+  * @param  ptr   the pointer of send data
+  * @param  size  send data size
+  * @retval result  sent size
+  */
 static int
 DevSpiSendDma(devSpiSc_t *psc, uint8_t *ptr, int size)
 {
@@ -327,6 +385,13 @@ fail:
 }
 const static uint8_t    devSpiRecvDmaModuleTbl[] = DMAMUX_MODULE_SPIRX_TBL;
 const static uint8_t    devSpiRecvDmaReqTbl[]    = DMAMUX_REQ_SPIRX_TBL;
+/**
+  * @brief  recv routine DMA
+  * @param  psc   pointer of internal descriptor
+  * @param  ptr   the pointer of send data
+  * @param  size  recv buffer size
+  * @retval size  size of recv
+  */
 static int
 DevSpiRecvDma(devSpiSc_t *psc, uint8_t *ptr, int size)
 {
