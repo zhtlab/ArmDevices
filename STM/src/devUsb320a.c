@@ -207,7 +207,7 @@ fail:
 
 
 int
-DevUsbOpenEp(int unit, int epnum, int eptype, int size)
+DevUsbOpenEp(int unit, uint8_t epnum, int eptype, int size)
 {
   devUsbSc_t            *psc;
   stm32Usb320aDev_t     *p;
@@ -255,7 +255,7 @@ DevUsbOpenEp(int unit, int epnum, int eptype, int size)
 
 
 int
-DevUsbCloseEp(int unit, int epnum)
+DevUsbCloseEp(int unit, uint8_t epnum)
 {
   devUsbSc_t            *psc;
   stm32Usb320aDev_t     *p;
@@ -280,7 +280,7 @@ DevUsbCloseEp(int unit, int epnum)
 
 
 int
-DevUsbTransmit(int unit, int epnum, const uint8_t *ptr, int size)
+DevUsbTransmit(int unit, uint8_t epnum, const uint8_t *ptr, int size)
 {
   devUsbSc_t            *psc;
   stm32Usb320aDev_t     *p;
@@ -310,7 +310,7 @@ DevUsbTransmit(int unit, int epnum, const uint8_t *ptr, int size)
 }
 
 int
-DevUsbPrepareReceive(int unit, int epnum, const uint8_t *ptr, int size)
+DevUsbPrepareReceive(int unit, uint8_t epnum, const uint8_t *ptr, int size)
 {
   devUsbSc_t            *psc;
   stm32Usb320aDev_t     *p;
@@ -334,7 +334,7 @@ DevUsbPrepareReceive(int unit, int epnum, const uint8_t *ptr, int size)
 
 
 int
-DevUsbSetStall(int unit, int epnum)
+DevUsbSetStall(int unit, uint8_t epnum)
 {
   devUsbSc_t            *psc;
   stm32Usb320aDev_t     *p;
@@ -556,16 +556,16 @@ DevUsbSetTRxFifo(int unit, usbdifDevFifo_t *pFifo)
   /* tx ep0 fifo */
   size   = pFifo->sizeTx[0];
   size >>= 2;
-  p->DIEPTXF0_HNPTXFSIZ = (((size << USB_DIEPTXF0SIZ_FD_SHIFT)& USB_GRXSIZ_RXFD_MASK) |
-                           (offset & USB_DIEPTXF0SIZ_SA_SHIFT));
+  p->DIEPTXF0_HNPTXFSIZ = (((size << USB_DIEPTXF_FD_SHIFT) & USB_DIEPTXF_FD_MASK) |
+                           (offset & USB_DIEPTXF_SA_MASK));
   offset += size;
 
   pSize = &pFifo->sizeTx[1];
-  for(int i = 0; i < STM320A_MAX_EPOUT; i++) {
+  for(int i = 0; i < STM320A_MAX_EPOUT-1; i++) {
     size   = *pSize++;
     size >>= 2;
-    p->DIEPTXF[i] = (((size << USB_DIEPTXF0SIZ_FD_SHIFT)& USB_GRXSIZ_RXFD_MASK) |
-                     (offset & USB_DIEPTXF0SIZ_SA_SHIFT));
+    p->DIEPTXF[i] = (((size << USB_DIEPTXF_FD_SHIFT) & USB_DIEPTXF_FD_MASK) |
+                     (offset & USB_DIEPTXF_SA_MASK));
     offset += size;
   }
   result = 0;
@@ -982,7 +982,7 @@ DevUsbFlushFifoTx(devUsbSc_t *psc, int num)
 
 #if 0
 static int
-DevUsbEpOutEnable(devUsbSc_t *psc, int epnum, uint8_t *ptr)
+DevUsbEpOutEnable(devUsbSc_t *psc, uint8_t epnum, uint8_t *ptr)
 {
   int                   result = -1;
 
@@ -1042,7 +1042,7 @@ DevUsbSetSpeed(devUsbSc_t *psc, int speed)
 
 #if 0
 static int
-DevUsbWritePacket(devUsbSc_t *psc, int epnum)
+DevUsbWritePacket(devUsbSc_t *psc, uint8_t epnum)
 {
   stm32Usb320aDev_t     *p;
   int                   size;
@@ -1105,7 +1105,7 @@ DevUsbWritePacket(devUsbSc_t *psc, int epnum)
 #else
 
 static int
-DevUsbStartPacketOut(devUsbSc_t *psc, int epnum)
+DevUsbStartPacketOut(devUsbSc_t *psc, uint8_t epnum)
 {
   stm32Usb320aDev_t     *p;
   int                   size;
@@ -1140,7 +1140,7 @@ end:
   return 0;
 }
 static int
-DevUsbStartPacketIn(devUsbSc_t *psc, int epnum)
+DevUsbStartPacketIn(devUsbSc_t *psc, uint8_t epnum)
 {
   stm32Usb320aDev_t     *p;
   int                   size;
@@ -1179,7 +1179,7 @@ end:
   return 0;
 }
 static int
-DevUsbWritePacket(devUsbSc_t *psc, int epnum)
+DevUsbWritePacket(devUsbSc_t *psc, uint8_t epnum)
 {
   stm32Usb320aDev_t     *p;
   int                   size;
@@ -1226,7 +1226,7 @@ DevUsbWritePacket(devUsbSc_t *psc, int epnum)
       src = (uint32_t *)psc->in[num].ptr;
 
       for(i = 0; i < (size+3)/4; i++) {
-        p->DFIFO[num][0] = *src++;
+        *p->DFIFO[num] = *src++;
       }
 
       psc->in[num].ptr += size;

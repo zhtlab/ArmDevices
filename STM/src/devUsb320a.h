@@ -79,12 +79,12 @@ int             DevUsbInit(int unit, devUsbParam_t *param);
 void            DevUsbInterruptUsb1(void);
 void            DevUsbInterruptUsb2(void);
 
-int             DevUsbOpenEp(int unit, int epnum, int type, int size);
-int             DevUsbCloseEp(int unit, int epnum);
+int             DevUsbOpenEp(int unit, uint8_t epnum, int type, int size);
+int             DevUsbCloseEp(int unit, uint8_t epnum);
 
-int             DevUsbTransmit(int unit, int epnum, const uint8_t *ptr, int size);
-int             DevUsbPrepareReceive(int unit, int epnum, const uint8_t *ptr, int size);
-int             DevUsbSetStall(int unit, int epnum);
+int             DevUsbTransmit(int unit, uint8_t epnum, const uint8_t *ptr, int size);
+int             DevUsbPrepareReceive(int unit, uint8_t epnum, const uint8_t *ptr, int size);
+int             DevUsbSetStall(int unit, uint8_t epnum);
 int             DevUsbSetAddress(int unit, int address);
 
 int             DevUsbSetTRxFifo(int unit, usbdifDevFifo_t *pFifo);
@@ -106,11 +106,11 @@ static int      DevUsbGetBusSpeed(devUsbSc_t *psc);
 static void     DevUsbFlushFifoRx(devUsbSc_t *psc, int num);
 static void     DevUsbFlushFifoTx(devUsbSc_t *psc, int num);
 
-static int      DevUsbEpOutEnable(devUsbSc_t *psc, int epnum, uint8_t *ptr);
+static int      DevUsbEpOutEnable(devUsbSc_t *psc, uint8_t epnum, uint8_t *ptr);
 static int      DevUsbSetSpeed(devUsbSc_t *psc, int speed);
-static int      DevUsbStartPacketOut(devUsbSc_t *psc, int epnum);
-static int      DevUsbStartPacketIn(devUsbSc_t *psc, int epnum);
-static int      DevUsbWritePacket(devUsbSc_t *psc, int epnum);
+static int      DevUsbStartPacketOut(devUsbSc_t *psc, uint8_t epnum);
+static int      DevUsbStartPacketIn(devUsbSc_t *psc, uint8_t epnum);
+static int      DevUsbWritePacket(devUsbSc_t *psc, uint8_t epnum);
 
 static int      DevUsbDisconnect(devUsbSc_t *psc);
 static int      DevUsbConnect(devUsbSc_t *psc);
