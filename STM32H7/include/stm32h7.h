@@ -62,7 +62,11 @@ enum irqNumbers {
   TIM3_IRQn,
   TIM4_IRQn,
 
-  SPI1_IRQn             =    35,
+  I2C1EV_IRQn             =    31,
+  I2C1ER_IRQn,
+  I2C2EV_IRQn,
+  I2C2ER_IRQn,
+  SPI1_IRQn,
   SPI2_IRQn,
   USART1_IRQn,
   USART2_IRQn,
@@ -456,6 +460,7 @@ typedef struct {
 #define DMAMUX2_PTR     ((stm32Dev_DMAMUX *) ((AHB4_BASE) + 0x8000))
 
 enum stm32Dev_DmaReq {
+  /* DMAMUX1 */
   DMAMUX_REQ_ADC1 = 9,
   DMAMUX_REQ_ADC2,
 
@@ -478,10 +483,15 @@ enum stm32Dev_DmaReq {
   DMAMUX_REQ_TIM4CH3,
   DMAMUX_REQ_TIM4UP,
 
-  DMAMUX_REQ_SPI1RX = 37,
+  DMAMUX_REQ_I2C1RX = 33,
+  DMAMUX_REQ_I2C1TX,
+  DMAMUX_REQ_I2C2RX,
+  DMAMUX_REQ_I2C2TX,
+  DMAMUX_REQ_SPI1RX,
   DMAMUX_REQ_SPI1TX,
   DMAMUX_REQ_SPI2RX,
   DMAMUX_REQ_SPI2TX,
+
 
   DMAMUX_REQ_SPI3RX = 61,
   DMAMUX_REQ_SPI3TX,
@@ -489,12 +499,24 @@ enum stm32Dev_DmaReq {
 
   DMAMUX_REQ_DAC1 = 67,
   DMAMUX_REQ_DAC2,
+  DMAMUX_REQ_I2C3RX = 73,
+  DMAMUX_REQ_I2C3TX,
   DMAMUX_REQ_SPI4RX = 83,
   DMAMUX_REQ_SPI4TX,
   DMAMUX_REQ_SPI5RX,
   DMAMUX_REQ_SPI5TX,
+
+
+  /* DMAMUX2 */
+  DMAMUX_REQ_I2C4RX = 13,
+  DMAMUX_REQ_I2C4TX,
 };
 
+#define DMAMUX_MODULE_I2CRX_TBL {0, 0, 0, 0, 0x20}        /* [7:4]: module number, [3:0]: reseved */
+#define DMAMUX_MODULE_I2CTX_TBL {0, 0, 0, 0, 0x20}        /* [7:4]: module number, [3:0]: reseved */
+#define DMAMUX_REQ_I2CRX_TBL   {0, DMAMUX_REQ_I2C1RX, DMAMUX_REQ_I2C2RX, DMAMUX_REQ_I2C3RX, DMAMUX_REQ_I2C4RX}
+#define DMAMUX_REQ_I2CTX_TBL   {0, DMAMUX_REQ_I2C1TX, DMAMUX_REQ_I2C2TX, DMAMUX_REQ_I2C3TX, DMAMUX_REQ_I2C4TX}
+  
 #define DMAMUX_MODULE_SPIRX_TBL {0, 0, 0, 0, 0, 0, 0x20}        /* [7:4]: module number, [3:0]: reseved */
 #define DMAMUX_MODULE_SPITX_TBL {0, 0, 0, 0, 0, 0, 0x20}        /* [7:4]: module number, [3:0]: reseved */
 #define DMAMUX_REQ_SPIRX_TBL   {0, DMAMUX_REQ_SPI1RX, DMAMUX_REQ_SPI2RX, DMAMUX_REQ_SPI3RX, DMAMUX_REQ_SPI4RX, DMAMUX_REQ_SPI5RX, DMAMUX_REQ_SPI6RX}
@@ -827,21 +849,35 @@ typedef struct {
 
 #include        "../../STM/include/stm32Tim.h"
 
-#define TIM2_PTR	((stm32Dev_TIM *) (APB1_BASE + 0x0000))
-#define TIM3_PTR	((stm32Dev_TIM *) (APB1_BASE + 0x0400))
-#define TIM4_PTR	((stm32Dev_TIM *) (APB1_BASE + 0x0800))
-#define TIM5_PTR	((stm32Dev_TIM *) (APB1_BASE + 0x0c00))
-#define TIM6_PTR	((stm32Dev_TIM *) (APB1_BASE + 0x1000))
-#define TIM7_PTR	((stm32Dev_TIM *) (APB1_BASE + 0x1400))
-#define TIM12_PTR	((stm32Dev_TIM *) (APB1_BASE + 0x1800))
-#define TIM13_PTR	((stm32Dev_TIM *) (APB1_BASE + 0x1c00))
-#define TIM14_PTR	((stm32Dev_TIM *) (APB1_BASE + 0x2000))
+#define TIM2_PTR        ((stm32Dev_TIM *) (APB1_BASE + 0x0000))
+#define TIM3_PTR        ((stm32Dev_TIM *) (APB1_BASE + 0x0400))
+#define TIM4_PTR        ((stm32Dev_TIM *) (APB1_BASE + 0x0800))
+#define TIM5_PTR        ((stm32Dev_TIM *) (APB1_BASE + 0x0c00))
+#define TIM6_PTR        ((stm32Dev_TIM *) (APB1_BASE + 0x1000))
+#define TIM7_PTR        ((stm32Dev_TIM *) (APB1_BASE + 0x1400))
+#define TIM12_PTR       ((stm32Dev_TIM *) (APB1_BASE + 0x1800))
+#define TIM13_PTR       ((stm32Dev_TIM *) (APB1_BASE + 0x1c00))
+#define TIM14_PTR       ((stm32Dev_TIM *) (APB1_BASE + 0x2000))
 
-#define TIM1_PTR	((stm32Dev_TIM *) (APB2_BASE + 0x0000))
-#define TIM8_PTR	((stm32Dev_TIM *) (APB2_BASE + 0x0400))
-#define TIM15_PTR	((stm32Dev_TIM *) (APB2_BASE + 0x4000))
-#define TIM16_PTR	((stm32Dev_TIM *) (APB2_BASE + 0x4400))
-#define TIM17_PTR	((stm32Dev_TIM *) (APB2_BASE + 0x4800))
+#define TIM1_PTR        ((stm32Dev_TIM *) (APB2_BASE + 0x0000))
+#define TIM8_PTR        ((stm32Dev_TIM *) (APB2_BASE + 0x0400))
+#define TIM15_PTR       ((stm32Dev_TIM *) (APB2_BASE + 0x4000))
+#define TIM16_PTR       ((stm32Dev_TIM *) (APB2_BASE + 0x4400))
+#define TIM17_PTR       ((stm32Dev_TIM *) (APB2_BASE + 0x4800))
+
+
+/*******************************************
+ * 47 I2C
+ */
+
+#define I2C_MODULE_COUNT                (4)
+
+#include        "../../STM/include/stm32I2c.h"
+
+#define I2C1_PTR        ((stm32Dev_I2C *) (APB1_BASE + 0x5400))
+#define I2C2_PTR        ((stm32Dev_I2C *) (APB1_BASE + 0x5800))
+#define I2C3_PTR        ((stm32Dev_I2C *) (APB1_BASE + 0x5c00))
+#define I2C4_PTR        ((stm32Dev_I2C *) (APB4_BASE + 0x1c00))
 
 
 /*******************************************
@@ -895,7 +931,7 @@ typedef struct {
 
 
 
-  typedef struct {
+typedef struct {
   __IO uint32_t         CR1;            /* 0x00 */
 #define SPI_CR1_SSI_SHIFT               (12)
 #define SPI_CR1_SSI_MASK                (1 << (SPI_CR1_SSI_SHIFT))
@@ -1065,8 +1101,8 @@ typedef struct {
 #define USB_EPCTL_CNAK_MASK     (1 << (USB_EPCTL_CNAK_SHIFT))
 #define USB_EPCTL_CNAK          (1 << (USB_EPCTL_CNAK_SHIFT))
 #define USB_EPCTL_TXFNUM_SHIFT  (22)
-#define USB_EPCTL_TXFNUM_MASK   (0xf << (USB_EPCTL_TXFNUM_SHIFT))
-#define USB_EPCTL_TXFNUM_VAL(x) ((x) << (USB_EPCTL_TXFNUM_SHIFT))
+#define USB_EPCTL_TXFNUM_MASK   (0xf  << (USB_EPCTL_TXFNUM_SHIFT))
+#define USB_EPCTL_TXFNUM_VAL(x) (((x) << (USB_EPCTL_TXFNUM_SHIFT)) & USB_EPCTL_TXFNUM_MASK)
 #define USB_EPCTL_STALL_SHIFT   (21)
 #define USB_EPCTL_STALL_MASK    (1 << (USB_EPCTL_STALL_SHIFT))
 #define USB_EPCTL_STALL_NO      (0 << (USB_EPCTL_STALL_SHIFT))
@@ -1272,10 +1308,10 @@ typedef struct {
 #define USB_GRXSIZ_RXFD_SHIFT           (0)
 #define USB_GRXSIZ_RXFD_MASK            (0xffff << (USB_GRXSIZ_RXFD_SHIFT))
   __IO uint32_t         DIEPTXF0_HNPTXFSIZ;
-#define USB_DIEPTXF0SIZ_FD_SHIFT        (16)
-#define USB_DIEPTXF0SIZ_FD_MASK         (0xffff << (USB_DIEPTXF0SIZ_FD_SHIFT))
-#define USB_DIEPTXF0SIZ_SA_SHIFT        (0)
-#define USB_DIEPTXF0SIZ_SA_MASK         (0xffff << (USB_DIEPTXF0SIZ_SA_SHIFT))
+#define USB_DIEPTXF_FD_SHIFT            (16)
+#define USB_DIEPTXF_FD_MASK             (0xffff << (USB_DIEPTXF_FD_SHIFT))
+#define USB_DIEPTXF_SA_SHIFT            (0)
+#define USB_DIEPTXF_SA_MASK             (0xffff << (USB_DIEPTXF_SA_SHIFT))
   __IO uint32_t         HNPTXSTS;
   __IO uint32_t         GI2CCTL;
   uint32_t              reserved_034;
