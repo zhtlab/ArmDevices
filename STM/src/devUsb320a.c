@@ -667,7 +667,6 @@ DevUsbInterruptEpOut(devUsbSc_t *psc)
         } else {
           if(epnum == 0) {
             if(psc->waitSetupPayload) {
-              DevUsbTransmit(psc->unit, epnum, NULL, 0);
               UsbdcoreCbSetup(psc->unit, &psc->setup);
               psc->waitSetupPayload = 0;
             } else {
