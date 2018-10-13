@@ -24,6 +24,21 @@
 #ifndef _DEV_I2C_H_
 #define _DEV_I2C_H_
 
+
+/*** request definition for DevI2cCtrl() */
+#define DEVI2C_REQ_MASK                 0xffffff00UL
+#define DEVI2C_CHOPPED_ACCESS           0x00000100UL
+#define DEVI2C_CHOPPED_ACCESS_MASK      0x000000ffUL
+#define DEVI2C_CHOPPED_ACCESS_START     (1 | (DEVI2C_CHOPPED_ACCESS))
+#define DEVI2C_CHOPPED_ACCESS_STOP      (2 | (DEVI2C_CHOPPED_ACCESS))
+#define DEVI2C_CHOPPED_ACCESS_DATA_TX   (4 | (DEVI2C_CHOPPED_ACCESS))
+#define DEVI2C_CHOPPED_ACCESS_DATA_RX   (8 | (DEVI2C_CHOPPED_ACCESS))
+
+#define DEVI2C_GET_SLAVE_STATUS         0x00000200UL
+#define         SLAVE_STATUS_ACK          1
+#define         SLAVE_STATUS_NACK         2
+
+
 typedef struct {
   uint32_t      addr;
   uint8_t       *ptrCmd;
@@ -56,6 +71,7 @@ typedef struct {
 typedef struct {
   uint8_t               up;
   uint8_t               unit;
+  uint8_t               addr7;
   uint8_t               seq;
 #define DEVI2C_SEQ_IDLE         0
 #define DEVI2C_SEQ_SEND_ADDR    1
@@ -70,6 +86,7 @@ typedef struct {
 #define DEVI2C_SEQ_SLAVE_SEND_ADDR    14
 #define DEVI2C_SEQ_SLAVE_SEND_DATA    15
 #define DEVI2C_SEQ_STAT_NACK_MASK       0x80
+  uint8_t               slaveStatus;
   devI2cPkt             pkt;
   devI2cParam_t         param;
   stm32Dev_I2C          *dev;
@@ -89,6 +106,7 @@ int                     DevI2cInit(int unit, devI2cParam_t *param);
 int                     DevI2cRecv(int unit, uint32_t addr, uint8_t *ptr, int size);
 int                     DevI2cSend(int unit, uint32_t addr, uint8_t *ptr, int size);
 int                     DevI2cTransmit(int unit, devI2cPkt *p);
+int                     DevI2cCtrl(int unit, uint32_t req, void *ptr, int size);
 
 
 #ifdef  _DEV_I2C_C_

@@ -33,6 +33,8 @@
 
 struct _stI2c         i2c;
 
+#define SHOW_I2C_PHASE          0
+
 /**
   * @brief  initilize the devcie
   * @param  unit   unit number
@@ -95,7 +97,7 @@ DevI2cInit(int unit, devI2cParam_t *param)
   p->TIMINGR = (I2C_TIMINGR_PRESC_VAL(1)
                 | I2C_TIMINGR_SCLDEL_VAL(1) | I2C_TIMINGR_SCLDEL_VAL(1)
                 | I2C_TIMINGR_SCLH_VAL(val) | I2C_TIMINGR_SCLL_VAL(val) );
-  p->CR1  |= I2C_CR1_NOSTRETCH_YES;
+  //  p->CR1  |= I2C_CR1_NOSTRETCH_YES;
   p->CR1  |= I2C_CR1_PE_YES;
 
   if(psc->param.intr) {
@@ -322,6 +324,154 @@ DevI2cTransmit(int unit, devI2cPkt *p)
 fail:
   return result;
 }
+
+
+/**
+  * @brief  control routine
+  * @param  unit  unit number
+  * @param  req   request number
+  * @param  ptr   the pointer of send data
+  * @param  size  send data size
+  * @retval result  success/fail
+  */
+int
+DevI2cCtrl(int unit, uint32_t req, void *ptr, int size)
+{
+  int           result = -1;
+
+  devI2cSc_t            *psc;
+  stm32Dev_I2C          *p;
+
+  if(unit > I2C_MODULE_COUNT) goto fail;
+  psc = &i2c.sc[unit];
+  p = psc->dev;
+
+  switch(req & DEVI2C_REQ_MASK) {
+  case  DEVI2C_CHOPPED_ACCESS:
+    if((req & DEVI2C_CHOPPED_ACCESS_START) & DEVI2C_CHOPPED_ACCESS_MASK) {
+      psc->addr7 = *(uint8_t *)ptr;
+#if SHOW_I2C_PHASE
+      printf("# i2c START cond addr:%x\r\n", psc->addr7);
+#endif
+
+      p->ICR = -1;
+      p->CR2 = (I2C_CR2_NBYTES_VAL(size) | I2C_CR2_SADD_VAL(psc->addr7<<1));
+      /* send the start condition */
+      p->CR2 |= I2C_CR2_START;
+
+      /* send the slave address */
+      while(1) {
+        uint32_t intr = p->ISR;
+#if SHOW_I2C_PHASE
+        printf("# i2c START wait %x %x %x\r\n", intr, size, p->CR2);
+#endif
+        if( intr & I2C_ISR_STOPF_MASK  ) {
+          psc->slaveStatus = SLAVE_STATUS_ACK;
+          if(intr & I2C_ISR_NACKF_MASK) {
+            psc->slaveStatus = SLAVE_STATUS_NACK;
+          }
+          psc->seq = DEVI2C_SEQ_IDLE;
+          goto fail;
+        }
+        if( intr & (I2C_ISR_NACKF_MASK | I2C_ISR_ALLERR_MASK) ) {
+          psc->slaveStatus = SLAVE_STATUS_NACK;
+          psc->seq = DEVI2C_SEQ_IDLE;
+          goto fail;
+        }
+        if( intr & I2C_ISR_TC_MASK  ) break;
+        if( intr & I2C_ISR_TXIS_MASK  ) break;
+      }
+      psc->slaveStatus = SLAVE_STATUS_ACK;
+      psc->seq = DEVI2C_SEQ_SEND_CMD;
+    }
+
+    if((req & DEVI2C_CHOPPED_ACCESS_DATA_TX) & DEVI2C_CHOPPED_ACCESS_MASK) {
+      if(psc->seq == DEVI2C_SEQ_IDLE) goto fail;
+#if SHOW_I2C_PHASE
+      printf("# i2c DATA TX size:%d\r\n", size);
+#endif
+
+      for(int i = 0; i < size; i++) {
+        while(1) {
+          uint32_t intr = p->ISR;
+          if( intr & (I2C_ISR_NACKF_MASK | I2C_ISR_ALLERR_MASK) ) {
+            psc->slaveStatus = SLAVE_STATUS_NACK;
+            goto fail;
+          }
+          if( (intr & I2C_ISR_TXIS_MASK)) break;
+        }
+        p->TXDR = *((uint8_t *)ptr + i);
+      }
+      while(!(p->ISR & I2C_ISR_TC_MASK));
+    }
+
+    if((req & DEVI2C_CHOPPED_ACCESS_DATA_RX) & DEVI2C_CHOPPED_ACCESS_MASK) {
+      if(psc->seq == DEVI2C_SEQ_IDLE) goto fail;
+#if SHOW_I2C_PHASE
+      printf("# i2c DATA RX size:%d\r\n", size);
+#endif
+      p->CR2 = (I2C_CR2_NBYTES_VAL(size) | I2C_CR2_SADD_VAL(psc->addr7<<1) |
+                I2C_CR2_RDWRN_RD);
+
+      /* send the start condition */
+      p->CR2 |= I2C_CR2_START;
+
+      while(1) {
+        uint32_t intr = p->ISR;
+        if( intr & (I2C_ISR_NACKF_MASK |  I2C_ISR_ALLERR_MASK)) {
+          psc->slaveStatus = SLAVE_STATUS_NACK;
+          goto fail;
+        }
+        if( intr & I2C_ISR_RXNE_MASK  ) break;
+        if( intr & I2C_ISR_STOPF_MASK  ) break;
+      }
+      psc->slaveStatus = SLAVE_STATUS_ACK;
+
+      for(int i = 0; i < size; i++) {
+        while(1) {
+          uint32_t intr = p->ISR;
+          if( (intr & I2C_ISR_RXNE_MASK)) break;
+        }
+        *((uint8_t *)ptr + i) = p->RXDR;
+      }
+      while(!(p->ISR & I2C_ISR_TC_MASK));
+    }
+
+    if(((req & DEVI2C_CHOPPED_ACCESS_STOP) & DEVI2C_CHOPPED_ACCESS_MASK) &&
+       !(p->ISR & I2C_ISR_STOPF_MASK)) {
+#if SHOW_I2C_PHASE
+      printf("# i2c STOP cond\r\n");
+#endif
+      if(psc->seq == DEVI2C_SEQ_IDLE) goto fail;
+      psc->seq == DEVI2C_SEQ_IDLE;
+
+      p->CR2 |= I2C_CR2_STOP;
+
+      while(1) {
+        uint32_t intr = p->ISR;
+        if( intr & (I2C_ISR_NACKF_MASK | I2C_ISR_ALLERR_MASK) ) {
+          psc->slaveStatus = SLAVE_STATUS_NACK;
+          goto fail;
+        }
+        if( intr & I2C_ISR_STOPF_MASK  ) break;
+      }
+      psc->slaveStatus = SLAVE_STATUS_ACK;
+      if(p->ISR & I2C_ISR_NACKF_MASK) psc->slaveStatus = SLAVE_STATUS_NACK;
+    }
+    p->ICR = p->ISR;
+
+    result = 0;
+    break;
+
+  case  DEVI2C_GET_SLAVE_STATUS:
+    result = psc->slaveStatus;
+    break;
+  }
+
+fail:
+  return result;
+}
+
 
 /*********************************
  * pio
