@@ -65,7 +65,7 @@ DevUsbInit(int unit, devUsbParam_t *param)
   int           result = -1;
 
   devUsbSc_t            *psc;
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
 
   int                   i;
 
@@ -210,7 +210,7 @@ int
 DevUsbOpenEp(int unit, uint8_t epnum, int eptype, int size)
 {
   devUsbSc_t            *psc;
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
 
   int                   num;
   uint32_t              type;
@@ -258,7 +258,7 @@ int
 DevUsbCloseEp(int unit, uint8_t epnum)
 {
   devUsbSc_t            *psc;
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
 
   int                   num;
 
@@ -283,7 +283,7 @@ int
 DevUsbTransmit(int unit, uint8_t epnum, const uint8_t *ptr, int size)
 {
   devUsbSc_t            *psc;
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
 
   int                   num, len;
   uint32_t              ctl, siz;
@@ -313,7 +313,7 @@ int
 DevUsbPrepareReceive(int unit, uint8_t epnum, const uint8_t *ptr, int size)
 {
   devUsbSc_t            *psc;
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
 
   int                   num;
   uint32_t              val;
@@ -337,7 +337,7 @@ int
 DevUsbSetStall(int unit, uint8_t epnum)
 {
   devUsbSc_t            *psc;
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
 
   int                   num;
   uint32_t              val;
@@ -357,7 +357,7 @@ int
 DevUsbSetAddress(int unit, int address)
 {
   devUsbSc_t            *psc;
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
 
   psc = &devUsb.sc[unit];
   p   = psc->dev;
@@ -388,7 +388,7 @@ DevUsbInterruptUsb2(void)
 static void
 DevUsbInterrupt(devUsbSc_t *psc)
 {
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
 
   uint32_t              i = 0, ep_intr = 0, epint = 0, epnum = 0;
   uint32_t              epbit = 0;
@@ -540,7 +540,7 @@ DevUsbSetTRxFifo(int unit, usbdifDevFifo_t *pFifo)
 {
   int                   result = -1;
   devUsbSc_t            *psc;
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
   int                   size, *pSize;
   int                   offset = 0;
 
@@ -577,7 +577,7 @@ DevUsbSetTRxFifo(int unit, usbdifDevFifo_t *pFifo)
 static int
 DevUsbInterruptEnumulate(devUsbSc_t *psc)
 {
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
 
   p = psc->dev;
 
@@ -623,7 +623,7 @@ DevUsbInterruptEnumulate(devUsbSc_t *psc)
 static void
 DevUsbInterruptEpOut(devUsbSc_t *psc)
 {
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
 
   uint32_t              epintr, epnum, epbit;
 
@@ -705,7 +705,7 @@ DevUsbInterruptEpOut(devUsbSc_t *psc)
 static void
 DevUsbInterruptEpIn(devUsbSc_t *psc)
 {
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
 
   uint32_t              epintr, epnum, epbit;
 
@@ -800,7 +800,7 @@ DevUsbInterruptRecvData(devUsbSc_t *psc)
   devUsbEp_t            *ep;
   uint32_t              *ptr;
 
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
 
   p = psc->dev;
 
@@ -857,7 +857,7 @@ DevUsbInterruptRecvData(devUsbSc_t *psc)
 static int
 DevUsbResetModule(devUsbSc_t *psc)
 {
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
 
   p = psc->dev;
 
@@ -873,7 +873,7 @@ DevUsbResetModule(devUsbSc_t *psc)
 static int
 DevUsbResetPort(devUsbSc_t *psc)
 {
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
 
   uint32_t              val;
 
@@ -900,7 +900,7 @@ DevUsbSetTurnArroundTime(devUsbSc_t *psc)
   uint32_t                      hclk;
   systemClockFreq_t             clk;
 
-  stm32Usb320aDev_t             *p;
+  stm32Dev_USB                  *p;
 
   p = psc->dev;
 
@@ -941,7 +941,7 @@ static int
 DevUsbGetBusSpeed(devUsbSc_t *psc)
 {
   int                   speed;
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
 
   p = psc->dev;
 
@@ -958,7 +958,7 @@ DevUsbGetBusSpeed(devUsbSc_t *psc)
 static void
 DevUsbFlushFifoRx(devUsbSc_t *psc, int num)
 {
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
   p = psc->dev;
 
   p->GRSTCTL = USB_GRSTCTL_RXFFLSH_EN;
@@ -969,7 +969,7 @@ DevUsbFlushFifoRx(devUsbSc_t *psc, int num)
 static void
 DevUsbFlushFifoTx(devUsbSc_t *psc, int num)
 {
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
   p = psc->dev;
 
   p->GRSTCTL = USB_GRSTCTL_TXFFLSH_EN | USB_GRSTCTL_TXFNUM(num);
@@ -985,7 +985,7 @@ DevUsbEpOutEnable(devUsbSc_t *psc, uint8_t epnum, uint8_t *ptr)
 {
   int                   result = -1;
 
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
   uint32_t              val;
   int                   num;
 
@@ -1013,7 +1013,7 @@ DevUsbEpOutEnable(devUsbSc_t *psc, uint8_t epnum, uint8_t *ptr)
 static int
 DevUsbSetSpeed(devUsbSc_t *psc, int speed)
 {
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
   uint32_t              val;
 
   p = psc->dev;
@@ -1043,7 +1043,7 @@ DevUsbSetSpeed(devUsbSc_t *psc, int speed)
 static int
 DevUsbWritePacket(devUsbSc_t *psc, uint8_t epnum)
 {
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
   int                   size;
   int                   num;
   int                   i;
@@ -1106,7 +1106,7 @@ DevUsbWritePacket(devUsbSc_t *psc, uint8_t epnum)
 static int
 DevUsbStartPacketOut(devUsbSc_t *psc, uint8_t epnum)
 {
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
   int                   size;
   int                   num;
   uint32_t              ctl = 0, siz = 0;
@@ -1141,7 +1141,7 @@ end:
 static int
 DevUsbStartPacketIn(devUsbSc_t *psc, uint8_t epnum)
 {
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
   int                   size;
   int                   num;
   int                   i;
@@ -1180,7 +1180,7 @@ end:
 static int
 DevUsbWritePacket(devUsbSc_t *psc, uint8_t epnum)
 {
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
   int                   size;
   int                   num;
   int                   i;
@@ -1242,7 +1242,7 @@ end:
 static int
 DevUsbConnect(devUsbSc_t *psc)
 {
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
   p = psc->dev;
 
   p->DCTL &= ~USB_DCTL_SDIS_MASK;
@@ -1252,7 +1252,7 @@ DevUsbConnect(devUsbSc_t *psc)
 static int
 DevUsbDisconnect(devUsbSc_t *psc)
 {
-  stm32Usb320aDev_t     *p;
+  stm32Dev_USB          *p;
   p = psc->dev;
 
   p->DCTL &= ~USB_DCTL_SDIS_MASK;
@@ -1264,7 +1264,7 @@ DevUsbDisconnect(devUsbSc_t *psc)
 
 
 void
-DevUsbDebugShowGeneralReg(stm32Usb320aDev_t *p, int num)
+DevUsbDebugShowGeneralReg(stm32Dev_USB *p, int num)
 {
   printf("GOTGCTL  %x %x %x %x %x %x %x\r\n", p->GOTGCTL, p->GOTGINT, p->GAHBCFG, p->GUSBCFG, p->GRSTCTL, p->GINTSTS, p->GINTMSK);
   printf("GRXSTSR  %x %x %x\r\n", p->GRXSTSR, p->GRXFSIZ, p->DIEPTXF0_HNPTXFSIZ);

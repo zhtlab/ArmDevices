@@ -56,7 +56,7 @@ typedef struct {
   uint8_t               waitSetupPayload: 1;
 
   uint8_t               unit;
-  stm32Usb320aDev_t     *dev;
+  stm32Dev_USB          *dev;
 
   usbifSetup_t          setup;
   uint8_t               lpmState;
@@ -117,6 +117,6 @@ static int      DevUsbConnect(devUsbSc_t *psc);
 
 #endif
 
-void     DevUsbDebugShowGeneralReg(stm32Usb320aDev_t *p, int num);
+void     DevUsbDebugShowGeneralReg(stm32Dev_USB *p, int num);
 
 #endif

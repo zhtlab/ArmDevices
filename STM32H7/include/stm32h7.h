@@ -846,8 +846,9 @@ typedef struct {
  * 41 TIM
  * 42 TIM
  */
+#define TIM_MODULE_COUNT                (17)
 
-#include        "../../STM/include/stm32Tim.h"
+#include        "stm32Tim.h"
 
 #define TIM2_PTR        ((stm32Dev_TIM *) (APB1_BASE + 0x0000))
 #define TIM3_PTR        ((stm32Dev_TIM *) (APB1_BASE + 0x0400))
@@ -869,10 +870,9 @@ typedef struct {
 /*******************************************
  * 47 I2C
  */
-
 #define I2C_MODULE_COUNT                (4)
 
-#include        "../../STM/include/stm32I2c.h"
+#include        "stm32I2c.h"
 
 #define I2C1_PTR        ((stm32Dev_I2C *) (APB1_BASE + 0x5400))
 #define I2C2_PTR        ((stm32Dev_I2C *) (APB1_BASE + 0x5800))
@@ -883,31 +883,9 @@ typedef struct {
 /*******************************************
  * 48 USART
  */
-#if 0
-/*** 0x004  USART CR2 */
-#define USART_CR2_STOP_SHIFT    (12)
-#define USART_CR2_STOP_MASK     (3 << (USART_CR2_STOP_SHIFT))
-#define USART_CR2_STOP_1BIT     (0 << (USART_CR2_STOP_SHIFT))
-#define USART_CR2_STOP_0_5BIT   (1 << (USART_CR2_STOP_SHIFT))
-#define USART_CR2_STOP_2BIT     (2 << (USART_CR2_STOP_SHIFT))
-#define USART_CR2_STOP_1_5BIT   (3 << (USART_CR2_STOP_SHIFT))
+#define USART_MODULE_COUNT              (4)
 
-/*** 0x008  USART CR3 */
-#define USART_CR3_RXFTCFG_SHIFT       (25)
-#define USART_CR3_RXFTCFG_MASK        (7 << (USART_CR3_RXFTCFG_SHIFT))
-#define USART_CR3_RXFTCFG_1_8         (0 << (USART_CR3_RXFTCFG_SHIFT))
-#define USART_CR3_RXFTCFG_1_4         (1 << (USART_CR3_RXFTCFG_SHIFT))
-#define USART_CR3_RXFTCFG_1_2         (2 << (USART_CR3_RXFTCFG_SHIFT))
-#define USART_CR3_RXFTCFG_3_4         (3 << (USART_CR3_RXFTCFG_SHIFT))
-#define USART_CR3_RXFTCFG_7_8         (4 << (USART_CR3_RXFTCFG_SHIFT))
-#define USART_CR3_RXFTCFG_FULL        (5 << (USART_CR3_RXFTCFG_SHIFT))
-
-
-#define USART_RX_FIFO_SIZE         (16)
-#define USART_TX_FIFO_SIZE         (16)
-#endif
-
-#include        "../../STM/include/stm32Usart.h"
+#include        "stm32Usart.h"
 
 #define USART1_PTR      ((stm32DEV_USART *) ((APB2_BASE) + 0x1000))
 #define USART6_PTR      ((stm32DEV_USART *) ((APB2_BASE) + 0x1400))
@@ -927,143 +905,7 @@ typedef struct {
  */
 #define SPI_MODULE_COUNT                (6)
 
-
-
-
-
-typedef struct {
-  __IO uint32_t         CR1;            /* 0x00 */
-#define SPI_CR1_SSI_SHIFT               (12)
-#define SPI_CR1_SSI_MASK                (1 << (SPI_CR1_SSI_SHIFT))
-#define SPI_CR1_SSI_NO                  (0 << (SPI_CR1_SSI_SHIFT))
-#define SPI_CR1_SSI_YES                 (1 << (SPI_CR1_SSI_SHIFT))
-#define SPI_CR1_HDDIR_SHIFT             (11)
-#define SPI_CR1_HDDIR_MASK              (1 << (SPI_CR1_HDDIR_SHIFT))
-#define SPI_CR1_HDDIR_NO                (0 << (SPI_CR1_HDDIR_SHIFT))
-#define SPI_CR1_HDDIR_YES               (1 << (SPI_CR1_HDDIR_SHIFT))
-#define SPI_CR1_CSUSP_SHIFT             (10)
-#define SPI_CR1_CSUSP_MASK              (1 << (SPI_CR1_CSUSP_SHIFT))
-#define SPI_CR1_CSUSP_NO                (0 << (SPI_CR1_CSUSP_SHIFT))
-#define SPI_CR1_CSUSP_YES               (1 << (SPI_CR1_CSUSP_SHIFT))
-#define SPI_CR1_CSTART_SHIFT            (9)
-#define SPI_CR1_CSTART_MASK             (1 << (SPI_CR1_CSTART_SHIFT))
-#define SPI_CR1_CSTART_NO               (0 << (SPI_CR1_CSTART_SHIFT))
-#define SPI_CR1_CSTART_YES              (1 << (SPI_CR1_CSTART_SHIFT))
-#define SPI_CR1_MASRX_SHIFT             (8)
-#define SPI_CR1_MASRX_MASK              (1 << (SPI_CR1_MASRX_SHIFT))
-#define SPI_CR1_MASRX_NO                (0 << (SPI_CR1_MASRX_SHIFT))
-#define SPI_CR1_MASRX_YES               (1 << (SPI_CR1_MASRX_SHIFT))
-#define SPI_CR1_SPE_SHIFT               (0)
-#define SPI_CR1_SPE_MASK                (1 << (SPI_CR1_SPE_SHIFT))
-#define SPI_CR1_SPE_NO                  (0 << (SPI_CR1_SPE_SHIFT))
-#define SPI_CR1_SPE_YES                 (1 << (SPI_CR1_SPE_SHIFT))
-
-  __IO uint32_t         CR2;            /* 0x04 */
-#define SPI_CR2_TSER_SHIFT              (16)
-#define SPI_CR2_TSER_MASK               (0xffff << (SPI_CR2_TSER_SHIFT))
-#define SPI_CR2_TSIZE_SHIFT             (0)
-#define SPI_CR2_TSIZE_MASK              (0xffff << (SPI_CR2_TSIZE_SHIFT))
-
-  __IO uint32_t         CFG1;           /* 0x08 */
-#define SPI_CFG1_MBR_SHIFT              (28)
-#define SPI_CFG1_MBR_MASK               (7 << (SPI_CFG1_MBR_SHIFT))
-#define SPI_CFG1_MBR_DIV2               (0 << (SPI_CFG1_MBR_SHIFT))
-#define SPI_CFG1_MBR_DIV4               (1 << (SPI_CFG1_MBR_SHIFT))
-#define SPI_CFG1_MBR_DIV8               (2 << (SPI_CFG1_MBR_SHIFT))
-#define SPI_CFG1_MBR_DIV16              (3 << (SPI_CFG1_MBR_SHIFT))
-#define SPI_CFG1_MBR_DIV32              (4 << (SPI_CFG1_MBR_SHIFT))
-#define SPI_CFG1_MBR_DIV64              (5 << (SPI_CFG1_MBR_SHIFT))
-#define SPI_CFG1_MBR_DIV128             (6 << (SPI_CFG1_MBR_SHIFT))
-#define SPI_CFG1_MBR_DIV256             (7 << (SPI_CFG1_MBR_SHIFT))
-#define SPI_CFG1_TXDMAEN_SHIFT          (15)
-#define SPI_CFG1_TXDMAEN_MASK           (1 << (SPI_CFG1_TXDMAEN_SHIFT))
-#define SPI_CFG1_TXDMAEN_NO             (0 << (SPI_CFG1_TXDMAEN_SHIFT))
-#define SPI_CFG1_TXDMAEN_YES            (1 << (SPI_CFG1_TXDMAEN_SHIFT))
-#define SPI_CFG1_RXDMAEN_SHIFT          (14)
-#define SPI_CFG1_RXDMAEN_MASK           (1 << (SPI_CFG1_RXDMAEN_SHIFT))
-#define SPI_CFG1_RXDMAEN_NO             (0 << (SPI_CFG1_RXDMAEN_SHIFT))
-#define SPI_CFG1_RXDMAEN_YES            (1 << (SPI_CFG1_RXDMAEN_SHIFT))
-#define SPI_CFG1_FTHLV_SHIFT            (5)
-#define SPI_CFG1_FTHLV_MASK             (15 << (SPI_CFG1_FTHLV_SHIFT))
-#define SPI_CFG1_FTHLV_VAL(x)           (((x)-1)  << (SPI_CFG1_FTHLV_SHIFT))
-#define SPI_CFG1_FTHLV_1BIT             (0  << (SPI_CFG1_FTHLV_SHIFT))
-#define SPI_CFG1_FTHLV_8BIT             (7  << (SPI_CFG1_FTHLV_SHIFT))
-#define SPI_CFG1_FTHLV_16BIT            (15  << (SPI_CFG1_FTHLV_SHIFT))
-#define SPI_CFG1_DSIZE_SHIFT            (0)
-#define SPI_CFG1_DSIZE_MASK             (31 << (SPI_CFG1_DSIZE_SHIFT))
-#define SPI_CFG1_DSIZE_VAL(x)           (((x)-1)  << (SPI_CFG1_DSIZE_SHIFT))
-#define SPI_CFG1_DSIZE_1BIT             (0  << (SPI_CFG1_DSIZE_SHIFT))
-#define SPI_CFG1_DSIZE_8BIT             (7  << (SPI_CFG1_DSIZE_SHIFT))
-#define SPI_CFG1_DSIZE_16BIT            (15 << (SPI_CFG1_DSIZE_SHIFT))
-#define SPI_CFG1_DSIZE_32BIT            (31 << (SPI_CFG1_DSIZE_SHIFT))
-
-  __IO uint32_t         CFG2;            /* 0x0c */
-#define SPI_CFG2_AFCNTR_SHIFT           (31)
-#define SPI_CFG2_AFCNTR_MASK            (3 << (SPI_CFG2_AFCNTR_SHIFT))
-#define SPI_CFG2_AFCNTR_NO              (0 << (SPI_CFG2_AFCNTR_SHIFT))
-#define SPI_CFG2_AFCNTR_YES             (1 << (SPI_CFG2_AFCNTR_SHIFT))
-#define SPI_CFG2_SSOM_SHIFT             (30)
-#define SPI_CFG2_SSOM_MASK              (3 << (SPI_CFG2_SSOM_SHIFT))
-#define SPI_CFG2_SSOM_NO                (0 << (SPI_CFG2_SSOM_SHIFT))
-#define SPI_CFG2_SSOM_YES               (1 << (SPI_CFG2_SSOM_SHIFT))
-#define SPI_CFG2_SSM_SHIFT              (26)
-#define SPI_CFG2_SSM_MASK               (3 << (SPI_CFG2_SSM_SHIFT))
-#define SPI_CFG2_SSM_NO                 (0 << (SPI_CFG2_SSM_SHIFT))
-#define SPI_CFG2_SSM_YES                (1 << (SPI_CFG2_SSM_SHIFT))
-#define SPI_CFG2_CPOL_SHIFT             (25)
-#define SPI_CFG2_CPOL_MASK              (3 << (SPI_CFG2_CPOL_SHIFT))
-#define SPI_CFG2_CPOL_NO                (0 << (SPI_CFG2_CPOL_SHIFT))
-#define SPI_CFG2_CPOL_YES               (1 << (SPI_CFG2_CPOL_SHIFT))
-#define SPI_CFG2_CPHA_SHIFT             (24)
-#define SPI_CFG2_CPHA_MASK              (3 << (SPI_CFG2_CPHA_SHIFT))
-#define SPI_CFG2_CPHA_NO                (0 << (SPI_CFG2_CPHA_SHIFT))
-#define SPI_CFG2_CPHA_YES               (1 << (SPI_CFG2_CPHA_SHIFT))
-#define SPI_CFG2_LSBFRST_SHIFT          (23)
-#define SPI_CFG2_LSBFRST_MASK           (3 << (SPI_CFG2_LSBFRST_SHIFT))
-#define SPI_CFG2_LSBFRST_NO             (0 << (SPI_CFG2_LSBFRST_SHIFT))
-#define SPI_CFG2_LSBFRST_YES            (1 << (SPI_CFG2_LSBFRST_SHIFT))
-#define SPI_CFG2_MASTER_SHIFT           (22)
-#define SPI_CFG2_MASTER_MASK            (3 << (SPI_CFG2_MASTER_SHIFT))
-#define SPI_CFG2_MASTER_NO              (0 << (SPI_CFG2_MASTER_SHIFT))
-#define SPI_CFG2_MASTER_YES             (1 << (SPI_CFG2_MASTER_SHIFT))
-#define SPI_CFG2_SP_SHIFT               (19)
-#define SPI_CFG2_SP_MASK                (3 << (SPI_CFG2_SP_SHIFT))
-#define SPI_CFG2_SP_MOTOROLA            (0 << (SPI_CFG2_SP_SHIFT))
-#define SPI_CFG2_SP_TI                  (1 << (SPI_CFG2_SP_SHIFT))
-#define SPI_CFG2_COMM_SHIFT             (17)
-#define SPI_CFG2_COMM_MASK              (3 << (SPI_CFG2_COMM_SHIFT))
-#define SPI_CFG2_COMM_FULL_DUP          (0 << (SPI_CFG2_COMM_SHIFT))
-#define SPI_CFG2_COMM_SIMPLEX_TX        (1 << (SPI_CFG2_COMM_SHIFT))
-#define SPI_CFG2_COMM_SIMPLEX_RX        (2 << (SPI_CFG2_COMM_SHIFT))
-#define SPI_CFG2_COMM_HALF_DUP          (3 << (SPI_CFG2_COMM_SHIFT))
-  __IO uint32_t         IER;            /* 0x10 */
-  __IO uint32_t         SR;             /* 0x14 */
-#define SPI_SR_RXPLVL_SHIFT             (13)
-#define SPI_SR_RXPLVL_MASK              (3 << (SPI_SR_RXPLVL_SHIFT))
-#define SPI_SR_RXPCNT_SHIFT             (13)
-#define SPI_SR_RXPCNT_MASK              (1 << (SPI_SR_RXPCNT_SHIFT))
-#define SPI_SR_TXC_SHIFT                (12)
-#define SPI_SR_TXC_MASK                 (1 << (SPI_SR_TXC_SHIFT))
-#define SPI_SR_EOT_SHIFT                (3)
-#define SPI_SR_EOT_MASK                 (1 << (SPI_SR_EOT_SHIFT))
-#define SPI_SR_TXP_SHIFT                (1)
-#define SPI_SR_TXP_MASK                 (1 << (SPI_SR_TXP_SHIFT))
-#define SPI_SR_RXP_SHIFT                (0)
-#define SPI_SR_RXP_MASK                 (1 << (SPI_SR_RXP_SHIFT))
-  __IO uint32_t         IFCR;           /* 0x18 */
-#define SPI_IFCR_CLEAR_ALL_SHIFT        (0)
-#define SPI_IFCR_CLEAR_ALL              (0x0ff8 << (SPI_IFCR_CLEAR_ALL_SHIFT))
-  uint32_t              reserved1c;     /* 0x1c */
-  __IO uint32_t         TXDR;           /* 0x20 */
-  uint32_t              reserved24[3];  /* 0x24 */
-  __IO uint32_t         RXDR;           /* 0x30 */
-  uint32_t              reserved34[3];  /* 0x34 */
-  __IO uint32_t         CRCPOLY;        /* 0x40 */
-  __IO uint32_t         TXCRC;          /* 0x44 */
-  __IO uint32_t         RXCRC;          /* 0x48 */
-  __IO uint32_t         UDRDR;          /* 0x4c */
-  __IO uint32_t         I2CCFGR;        /* 0x50 */
-} stm32Dev_SPI;
+#include        "stm32Spi32.h"
 
 #define SPI1_PTR        ((stm32Dev_SPI *) ((APB2_BASE) + 0x3000))
 #define SPI4_PTR        ((stm32Dev_SPI *) ((APB2_BASE) + 0x3400))
@@ -1553,11 +1395,11 @@ typedef struct {
 #define USB_FIFO_SIZE   0x1000
   __IO uint32_t         DFIFO[15][USB_FIFO_SIZE/4];
 
-} stm32Usb320aDev_t;
+} stm32Dev_USB;
 
 
-#define USB1_HS                 ((stm32Usb320aDev_t *) (BUS_PERIPHERAL+0x40000))
-#define USB2_FS                 ((stm32Usb320aDev_t *) (BUS_PERIPHERAL+0x80000))
+#define USB1_HS                 ((stm32Dev_USB *) (BUS_PERIPHERAL+0x40000))
+#define USB2_FS                 ((stm32Dev_USB *) (BUS_PERIPHERAL+0x80000))
 
 
 #define USB_FS_MAX_PACKET_SIZE          64
