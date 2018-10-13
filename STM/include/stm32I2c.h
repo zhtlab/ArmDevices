@@ -131,6 +131,9 @@ typedef struct {
 
   __IO uint32_t         ISR;            /* 0x18 */
   __IO uint32_t         ICR;            /* 0x1c */
+#define I2C_ISR_ALLERR_MASK             0x3f00
+#define I2C_ISR_BUSY_SHIFT              15
+#define I2C_ISR_BUSY_MASK               (1 << (I2C_ISR_BUSY_SHIFT))
 #define I2C_ISR_TCR_SHIFT               7
 #define I2C_ISR_TCR_MASK                (1 << (I2C_ISR_TCR_SHIFT))
 #define I2C_ISR_TC_SHIFT                6
