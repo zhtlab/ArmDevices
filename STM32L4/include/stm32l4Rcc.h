@@ -365,6 +365,11 @@ typedef struct {
 #define RCC_CICR_LSI_RDYC_YES		(1 << (RCC_CICR_LSI_RDYC_SHIFT))
   __IO uint32_t         reserved0x24;   /* 0x24 */
   __IO uint32_t         AHB1RSTR;       /* 0x28 */
+#define RCC_APB1RSTR1_CRSRST_SHIFT      24
+#define RCC_APB1RSTR1_CRSRST_MASK       (1 << (RCC_APB1RSTR1_CRSRST_SHIFT))
+#define RCC_APB1RSTR1_CRSRST_NO         (0 << (RCC_APB1RSTR1_CRSRST_SHIFT))
+#define RCC_APB1RSTR1_CRSRST_YES        (1 << (RCC_APB1RSTR1_CRSRST_SHIFT))
+
   __IO uint32_t         AHB2RSTR;       /* 0x2c */
   __IO uint32_t         AHB3RSTR;       /* 0x30 */
   __IO uint32_t         reserved0x34;   /* 0x34 */
