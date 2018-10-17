@@ -1,4 +1,27 @@
-#ifndef	_STM32L4_H_
+/*
+ * Copyright (c) 2018 zhtlab
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files
+ * (the "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit
+ * persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
+
+#ifndef _STM32L4_H_
 #define _STM32L4_H_
 
 #define __CM4_REV               1
@@ -10,6 +33,11 @@
 #ifndef __IO
 #define __IO            volatile
 #endif
+
+
+
+#define __FPU_PRESENT           1
+
 
 
 /*************************************************************
@@ -35,16 +63,34 @@ enum irqNumbers {
   DebugMonitor_IRQn     =  ( -4),
   PendSV_IRQn           =  ( -2),
   SysTick_IRQn          =  ( -1),
+  DMA1_CH1_IRQn         =  11,
+  DMA1_CH2_IRQn,
+  DMA1_CH3_IRQn,
+  DMA1_CH4_IRQn,
+  DMA1_CH5_IRQn,
+  DMA1_CH6_IRQn,
+  DMA1_CH7_IRQn,
+  ADC1_IRQn,
   TIM1_BRK_TIM15_IRQn   =    24,
   TIM1_UP_TIM15_IRQn,
   TIM1_TRG_COM_IRQn,
   TIM1_CC_IRQn,
-  ADC_IRQn                =  18,
-  TIM2_IRQn               =  28,
+  TIM2_IRQn,
   TIM3_IRQn,
-  USART1_IRQn             =  37,
+  I2C1_EV_IRQn            =  31,
+  I2C1_ER_IRQn,
+  I2C2_EV_IRQn,
+  I2C2_ER_IRQn,
+  SPI1_IRQn,
+  SPI2_IRQn,
+  USART1_IRQn,
   USART2_IRQn,
   USART3_IRQn,
+
+  USB_FS_IRQn             =  67,
+
+  I2C3_EV_IRQn            =  72,
+  I2C3_ER_IRQn,
 };
 
 typedef int     IRQn_Type;
@@ -107,10 +153,40 @@ struct _stStm32l4_IWDG {
 #define IWDG	(*IWDG_PTR)
 #endif
 
+
+/*******************************************
+ * 05 PWR
+ */
+typedef struct {
+  __IO uint32_t         CR1;
+  __IO uint32_t         CR2;
+
+#define PWR_CR2_USV_SHIFT       10
+#define PWR_CR2_USV_MASK        (1 << (PWR_CR2_USV_SHIFT))
+#define PWR_CR2_USV_NO          (0 << (PWR_CR2_USV_SHIFT))
+#define PWR_CR2_USV_YES         (1 << (PWR_CR2_USV_SHIFT))
+  __IO uint32_t         CR3;
+
+  __IO uint32_t         CR4;
+
+} stm32Dev_PWR;
+
+#define PWR_PTR         ((stm32Dev_PWR *) (APB1_BASE + 0x7000))
+
+
+/*******************************************
+ * 07 CRS
+ */
+
+#include        "stm32Crs.h"
+
+#define CRS_PTR        ((stm32Dev_CRS *) (APB1_BASE + 0x6000))
+
+
 /*************************************************************
  * USART
  */
-#include        "../../STM/include/stm32Usart.h"
+#include        "stm32Usart.h"
 
 #define USART1_PTR      ((stm32DEV_USART *) ((APB2_BASE) + 0x3800))
 #define USART_PTR       ((stm32Dev_USART *) ((APB1_BASE) + 0x4000))
@@ -300,15 +376,15 @@ struct _stStm32l4_FLASH {
 #define CR_LOCK_MASK		(1UL << (CR_LOCK_SHIFT))
 #define CR_LOCK_NO		(0UL << (CR_LOCK_SHIFT))
 #define CR_LOCK_YES		(1UL << (CR_LOCK_SHIFT))
-#define CR_OPTLOCK_SHIFT	30	
+#define CR_OPTLOCK_SHIFT	30
 #define CR_OPTLOCK_MASK		(1 << (CR_OPTLOCK_SHIFT))
 #define CR_OPTLOCK_NO		(0 << (CR_OPTLOCK_SHIFT))
 #define CR_OPTLOCK_YES		(1 << (CR_OPTLOCK_SHIFT))
-#define CR_OBL_LAUNCH_SHIFT	27	
+#define CR_OBL_LAUNCH_SHIFT	27
 #define CR_OBL_LAUNCH_MASK	(1 << (CR_OBL_LAUNCH_SHIFT))
 #define CR_OBL_LAUNCH_NO	(0 << (CR_OBL_LAUNCH_SHIFT))
 #define CR_OBL_LAUNCH_YES	(1 << (CR_OBL_LAUNCH_SHIFT))
-#define CR_RDERRIE_SHIFT	26	
+#define CR_RDERRIE_SHIFT	26
 #define CR_RDERRIE_MASK		(1 << (CR_RDERRIE_SHIFT))
 #define CR_RDERRIE_NO		(0 << (CR_RDERRIE_SHIFT))
 #define CR_RDERRIE_YES		(1 << (CR_RDERRIE_SHIFT))
@@ -369,218 +445,6 @@ struct _stStm32l4_FLASH {
 #define TIM15_PTR	((stm32Dev_TIM *) (APB2_BASE + 0x4000))
 #define TIM16_PTR	((stm32Dev_TIM *) (APB2_BASE + 0x4400))
 
-
-struct _stStm32l4_I2C {
-  __IO uint32_t	cr1;		/* 0x00 */
-#define CR1_PECEN_SHIFT		23
-#define CR1_PECEN_MASK		(1 << (CR1_PECEN_SHIFT))
-#define CR1_PECEN_NO		(0 << (CR1_PECEN_SHIFT))
-#define CR1_PECEN_YES		(1 << (CR1_PECEN_SHIFT))
-#define CR1_ALERTEN_SHIFT	22	
-#define CR1_ALERTEN_MASK	(1 << (CR1_ALERTEN_SHIFT))
-#define CR1_ALERTEN_NO		(0 << (CR1_ALERTEN_SHIFT))
-#define CR1_ALERTEN_YES		(1 << (CR1_ALERTEN_SHIFT))
-#define CR1_SMBDEN_SHIFT	21	
-#define CR1_SMBDEN_MASK		(1 << (CR1_SMBDEN_SHIFT))
-#define CR1_SMBDEN_NO		(0 << (CR1_SMBDEN_SHIFT))
-#define CR1_SMBDEN_YES		(1 << (CR1_SMBDEN_SHIFT))
-#define CR1_SMBHEN_SHIFT	20	
-#define CR1_SMBHEN_MASK		(1 << (CR1_SMBHEN_SHIFT))
-#define CR1_SMBHEN_NO		(0 << (CR1_SMBHEN_SHIFT))
-#define CR1_SMBHEN_YES		(1 << (CR1_SMBHEN_SHIFT))
-#define CR1_GCEN_SHIFT		19
-#define CR1_GCEN_MASK		(1 << (CR1_GCEN_SHIFT))
-#define CR1_GCEN_NO		(0 << (CR1_GCEN_SHIFT))
-#define CR1_GCEN_YES		(1 << (CR1_GCEN_SHIFT))
-#define CR1_WUPEN_SHIFT		18
-#define CR1_WUPEN_MASK		(1 << (CR1_WUPEN_SHIFT))
-#define CR1_WUPEN_NO		(0 << (CR1_WUPEN_SHIFT))
-#define CR1_WUPEN_YES		(1 << (CR1_WUPEN_SHIFT))
-#define CR1_NOSTRETCH_SHIFT	17	
-#define CR1_NOSTRETCH_MASK	(1 << (CR1_NOSTRETCH_SHIFT))
-#define CR1_NOSTRETCH_NO	(0 << (CR1_NOSTRETCH_SHIFT))
-#define CR1_NOSTRETCH_YES	(1 << (CR1_NOSTRETCH_SHIFT))
-#define CR1_SBC_SHIFT		16
-#define CR1_SBC_MASK		(1 << (CR1_SBC_SHIFT))
-#define CR1_SBC_NO		(0 << (CR1_SBC_SHIFT))
-#define CR1_SBC_YES		(1 << (CR1_SBC_SHIFT))
-#define CR1_RXDDMAEN_SHIFT	15	
-#define CR1_RXDDMAEN_MASK      	(1 << (CR1_RXDDMAEN_SHIFT))
-#define CR1_RXDDMAEN_NO		(0 << (CR1_RXDDMAEN_SHIFT))
-#define CR1_RXDDMAEN_YES       	(1 << (CR1_RXDDMAEN_SHIFT))
-#define CR1_TXDMAEN_SHIFT	14	
-#define CR1_TXDMAEN_MASK	(1 << (CR1_TXDMAEN_SHIFT))
-#define CR1_TXDMAEN_NO		(0 << (CR1_TXDMAEN_SHIFT))
-#define CR1_TXDMAEN_YES		(1 << (CR1_TXDMAEN_SHIFT))
-#define CR1_ANFOFF_SHIFT	12	
-#define CR1_ANFOFF_MASK		(1 << (CR1_ANFOFF_SHIFT))
-#define CR1_ANFOFF_NO		(0 << (CR1_ANFOFF_SHIFT))
-#define CR1_ANFOFF_YES		(1 << (CR1_ANFOFF_SHIFT))
-#define CR1_DNF_SHIFT		8
-#define CR1_DNF_MASK		(15 << (CR1_DNF_SHIFT))
-#define CR1_DNF_OFF		(0 << (CR1_DNF_SHIFT))
-#define CR1_DNF_CLK1		(1 << (CR1_DNF_SHIFT))
-#define CR1_DNF_CLK2		(2 << (CR1_DNF_SHIFT))
-#define CR1_DNF_CLK15		(15 << (CR1_DNF_SHIFT))
-#define CR1_ERRIE_SHIFT		7
-#define CR1_ERRIE_MASK		(1 << (CR1_ERRIE_SHIFT))
-#define CR1_ERRIE_NO		(0 << (CR1_ERRIE_SHIFT))
-#define CR1_ERRIE_YES		(1 << (CR1_ERRIE_SHIFT))
-#define CR1_TCIE_SHIFT		6
-#define CR1_TCIE_MASK		(1 << (CR1_TCIE_SHIFT))
-#define CR1_TCIE_NO		(0 << (CR1_TCIE_SHIFT))
-#define CR1_TCIE_YES		(1 << (CR1_TCIE_SHIFT))
-#define CR1_STOPIE_SHIFT	5	
-#define CR1_STOPIE_MASK		(1 << (CR1_STOPIE_SHIFT))
-#define CR1_STOPIE_NO		(0 << (CR1_STOPIE_SHIFT))
-#define CR1_STOPIE_YES		(1 << (CR1_STOPIE_SHIFT))
-#define CR1_NACKIE_SHIFT	4	
-#define CR1_NACKIE_MASK		(1 << (CR1_NACKIE_SHIFT))
-#define CR1_NACKIE_NO		(0 << (CR1_NACKIE_SHIFT))
-#define CR1_NACKIE_YES		(1 << (CR1_NACKIE_SHIFT))
-#define CR1_ADDRIE_SHIFT	3	
-#define CR1_ADDRIE_MASK		(1 << (CR1_ADDRIE_SHIFT))
-#define CR1_ADDRIE_NO		(0 << (CR1_ADDRIE_SHIFT))
-#define CR1_ADDRIE_YES		(1 << (CR1_ADDRIE_SHIFT))
-#define CR1_RXIE_SHIFT		2
-#define CR1_RXIE_MASK		(1 << (CR1_RXIE_SHIFT))
-#define CR1_RXIE_NO		(0 << (CR1_RXIE_SHIFT))
-#define CR1_RXIE_YES		(1 << (CR1_RXIE_SHIFT))
-#define CR1_TXIE_SHIFT		1
-#define CR1_TXIE_MASK		(1 << (CR1_TXIE_SHIFT))
-#define CR1_TXIE_NO		(0 << (CR1_TXIE_SHIFT))
-#define CR1_TXIE_YES		(1 << (CR1_TXIE_SHIFT))
-#define CR1_PE_SHIFT		0
-#define CR1_PE_MASK		(1 << (CR1_PE_SHIFT))
-#define CR1_PE_NO		(0 << (CR1_PE_SHIFT))
-#define CR1_PE_YES		(1 << (CR1_PE_SHIFT))
-  
-  __IO uint32_t	cr2;		/* 0x04 */
-#define CR2_PECBYTE_SHIFT	26	
-#define CR2_PECBYTE_MASK	(1 << (CR2_PECBYTE_SHIFT))
-#define CR2_PECBYTE_NO		(0 << (CR2_PECBYTE_SHIFT))
-#define CR2_PECBYTE_YES		(1 << (CR2_PECBYTE_SHIFT))
-#define CR2_AUTOEND_SHIFT	25	
-#define CR2_AUTOEND_MASK	(1 << (CR2_AUTOEND_SHIFT))
-#define CR2_AUTOEND_NO		(0 << (CR2_AUTOEND_SHIFT))
-#define CR2_AUTOEND_YES		(1 << (CR2_AUTOEND_SHIFT))
-#define CR2_RELOAD_SHIFT	24	
-#define CR2_RELOAD_MASK		(1 << (CR2_RELOAD_SHIFT))
-#define CR2_RELOAD_NO		(0 << (CR2_RELOAD_SHIFT))
-#define CR2_RELOAD_YES		(1 << (CR2_RELOAD_SHIFT))
-#define CR2_NBYTES_SHIFT	16	
-#define CR2_NBYTES_MASK		(0xff << (CR2_NBYTES_SHIFT))
-#define CR2_NACK_SHIFT		15
-#define CR2_NACK_MASK		(1 << (CR2_NACK_SHIFT))
-#define CR2_NACK_NO		(0 << (CR2_NACK_SHIFT))
-#define CR2_NACK_YES		(1 << (CR2_NACK_SHIFT))
-#define CR2_STOP_SHIFT		14
-#define CR2_STOP_MASK		(1 << (CR2_STOP_SHIFT))
-#define CR2_STOP_NO		(0 << (CR2_STOP_SHIFT))
-#define CR2_STOP_YES		(1 << (CR2_STOP_SHIFT))
-#define CR2_START_SHIFT		13
-#define CR2_START_MASK		(1 << (CR2_START_SHIFT))
-#define CR2_START_NO		(0 << (CR2_START_SHIFT))
-#define CR2_START_YES		(1 << (CR2_START_SHIFT))
-#define CR2_HEAD10R_SHIFT	12	
-#define CR2_HEAD10R_MASK	(1 << (CR2_HEAD10R_SHIFT))
-#define CR2_HEAD10R_NO		(0 << (CR2_HEAD10R_SHIFT))
-#define CR2_HEAD10R_YES		(1 << (CR2_HEAD10R_SHIFT))
-#define CR2_ADDR10_SHIFT	11	
-#define CR2_ADDR10_MASK		(1 << (CR2_ADDR10_SHIFT))
-#define CR2_ADDR10_NO		(0 << (CR2_ADDR10_SHIFT))
-#define CR2_ADDR10_YES		(1 << (CR2_ADDR10_SHIFT))
-#define CR2_RD_WDN_SHIFT	10	
-#define CR2_RD_WDN_MASK		(1 << (CR2_RD_WDN_SHIFT))
-#define CR2_RD_WDN_NO		(0 << (CR2_RD_WDN_SHIFT))
-#define CR2_RD_WDN_YES		(1 << (CR2_RD_WDN_SHIFT))
-#define CR2_SADD_SHIFT		0
-#define CR2_SADD_MASK		(0x3ff << (CR2_SADD_SHIFT))
-
-  __IO uint32_t	oar1;		/* 0x08 */
-#define OAR1_OA1EN_SHIFT	15
-#define OAR1_OA1EN_MASK		(1 << (OAR1_OA1EN_SHIFT))
-#define OAR1_OA1EN_NO		(0 << (OAR1_OA1EN_SHIFT))
-#define OAR1_OA1EN_YES		(1 << (OAR1_OA1EN_SHIFT))
-#define OAR1_OA1MODE_SHIFT	10
-#define OAR1_OA1MODE_MASK	(1 << (OAR1_OA1MODE_SHIFT))
-#define OAR1_OA1MODE_NO		(0 << (OAR1_OA1MODE_SHIFT))
-#define OAR1_OA1MODE_YES	(1 << (OAR1_OA1MODE_SHIFT))
-#define OAR1_OA1_7BIT_SHIFT	1
-#define OAR1_OA1_7BIT_MASK	(1 << (OAR1_OA1_7BIT_SHIFT))
-#define OAR1_OA1_10BIT_SHIFT	0
-#define OAR1_OA1_10BIT_MASK	(1 << (OAR1_OA1_10BIT_SHIFT))
-
-  __IO uint32_t	oar2;		/* 0x0c */
-  __IO uint32_t	timingr;	/* 0x10 */
-  __IO uint32_t	timeoutr;	/* 0x14 */
-  __IO uint32_t	isr;		/* 0x18 */
-  /* use IISR,_XX, because ISR_XX word is already used in USART */
-#define IISR_ADDCODE_SHIFT	17	
-#define IISR_ADDCODE_MASK	(0x7f << (IISR_ADDCODE_SHIFT))
-#define IISR_DIR_SHIFT		16
-#define IISR_DIR_MASK		(1 << (IISR_DIR_SHIFT))
-#define IISR_BUSY_SHIFT		15
-#define IISR_BUSY_MASK		(1 << (IISR_BUSY_SHIFT))
-#define IISR_ALERT_SHIFT	13
-#define IISR_ALERT_MASK		(1 << (IISR_ALERT_SHIFT))
-#define IISR_TIMEOUT_SHIFT	12	
-#define IISR_TIMEOUT_MASK	(1 << (IISR_TIMEOUT_SHIFT))
-#define IISR_PECERR_SHIFT	11	
-#define IISR_PECERR_MASK	(1 << (IISR_PECERR_SHIFT))
-#define IISR_OVR_SHIFT		10
-#define IISR_OVR_MASK		(1 << (IISR_OVR_SHIFT))
-#define IISR_ARLO_SHIFT		9
-#define IISR_ARLO_MASK		(1 << (IISR_ARLO_SHIFT))
-#define IISR_PE_SHIFT		8
-#define IISR_BERR_MASK		(1 << (IISR_BERR_SHIFT))
-#define IISR_TCR_SHIFT		7
-#define IISR_TCR_MASK		(1 << (IISR_TCR_SHIFT))
-#define IISR_TC_SHIFT		6
-#define IISR_TC_MASK		(1 << (IISR_TC_SHIFT))
-#define IISR_STOPF_SHIFT	5
-#define IISR_STOPF_MASK		(1 << (IISR_STOPF_SHIFT))
-#define IISR_NACKF_SHIFT	4
-#define IISR_NACKF_MASK		(1 << (IISR_NACKF_SHIFT))
-#define IISR_ADDR_SHIFT		3
-#define IISR_ADDR_MASK		(1 << (IISR_ADDR_SHIFT))
-#define IISR_RXNE_SHIFT		2
-#define IISR_RXNE_MASK		(1 << (IISR_RXNE_SHIFT))
-#define IISR_RXIS_SHIFT		1
-#define IISR_RXIS_MASK		(1 << (IISR_RXIS_SHIFT))
-#define IISR_RXIS_FLUSH		(1 << (IISR_RXIS_SHIFT))
-#define IISR_TXE_SHIFT		0
-#define IISR_TXE_MASK		(1 << (IISR_TXE_SHIFT))
-#define IISR_TXE_FLUSH		(1 << (IISR_TXE_SHIFT))
-
-  __IO uint32_t	icr;		/* 0x1c */
-#define ICR_ALERTCF_SHIFT	13	
-#define ICR_ALERTCF_CLEAR	(1 << (ICR_ALERTCF_SHIFT))
-#define ICR_TIMEOUTCF_SHIFT	12	
-#define ICR_TIMEOUTCF_CLEAR	(1 << (ICR_TIMEOUTCF_SHIFT))
-#define ICR_PECCF_SHIFT		11
-#define ICR_PECCF_CLEAR		(1 << (ICR_PECCF_SHIFT))
-#define ICR_OVRCF_SHIFT		10
-#define ICR_OVRCF_CLEAR		(1 << (ICR_OVRCF_SHIFT))
-#define ICR_ARLOCKF_SHIFT	9	
-#define ICR_ARLOCKF_CLEAR	(1 << (ICR_ARLOCKF_SHIFT))
-#define ICR_BERRCF_SHIFT	8	
-#define ICR_BERRCF_CLEAR	(1 << (ICR_BERRCF_SHIFT))
-#define ICR_STOPCF_SHIFT	5	
-#define ICR_STOPCF_CLEAR	(1 << (ICR_STOPCF_SHIFT))
-#define ICR_NACKCF_SHIFT	4	
-#define ICR_NACKCF_CLEAR	(1 << (ICR_NACKCF_SHIFT))
-#define ICR_ADDRCF_SHIFT	3
-#define ICR_ADDRCF_CLEAR	(1 << (ICR_ADDRCF_SHIFT))
-
-  __IO uint32_t	pecr;		/* 0x20 */
-  __IO uint32_t	rxdr;		/* 0x24 */
-  __IO uint32_t	txdr;		/* 0x28 */
-};
-#define I2C_PTR		((struct _stStm32l4_I2C *) (APB1_BASE + 0x5400))
-#define I2C1_PTR	((struct _stStm32l4_I2C *) (APB1_BASE + 0x5400))
-#define I2C2_PTR	((struct _stStm32l4_I2C *) (APB1_BASE + 0x5800))
-#define I2C3_PTR	((struct _stStm32l4_I2C *) (APB1_BASE + 0x5c00))
 
 
 /*******************************************
@@ -761,7 +625,7 @@ struct _stStm32l4_DAC {
 #define CR_CEN2_MASK		(1 << (CR_CEN2_SHIFT))
 #define CR_CEN2_NO		(0 << (CR_CEN2_SHIFT))
 #define CR_CEN2_YES		(1 << (CR_CEN2_SHIFT))
-#define CR_DMAUDRIE2_SHIFT	29	
+#define CR_DMAUDRIE2_SHIFT	29
 #define CR_DMAUDRIE2_MASK	(1 << (CR_DMAUDRIE2_SHIFT))
 #define CR_DMAUDRIE2_NO		(0 << (CR_DMAUDRIE2_SHIFT))
 #define CR_DMAUDRIE2_YES	(1 << (CR_DMAUDRIE2_SHIFT))
@@ -809,7 +673,7 @@ struct _stStm32l4_DAC {
 #define CR_CEN1_MASK		(1 << (CR_CEN1_SHIFT))
 #define CR_CEN1_NO		(0 << (CR_CEN1_SHIFT))
 #define CR_CEN1_YES		(1 << (CR_CEN1_SHIFT))
-#define CR_DMAUDRIE1_SHIFT	13	
+#define CR_DMAUDRIE1_SHIFT	13
 #define CR_DMAUDRIE1_MASK	(1 << (CR_DMAUDRIE1_SHIFT))
 #define CR_DMAUDRIE1_NO		(0 << (CR_DMAUDRIE1_SHIFT))
 #define CR_DMAUDRIE1_YES	(1 << (CR_DMAUDRIE1_SHIFT))
@@ -855,18 +719,18 @@ struct _stStm32l4_DAC {
 #define CR_EN1_YES		(1 << (CR_EN1_SHIFT))
 
   __IO uint32_t	swtrgr;			/* 0x04 */
-  __IO uint32_t	dhr12r1;			/* 0x08 */
-  __IO uint32_t	dhr12l1;			/* 0x0c */
+  __IO uint32_t	dhr12r1;		/* 0x08 */
+  __IO uint32_t	dhr12l1;		/* 0x0c */
   __IO uint32_t	dhr8r1;			/* 0x10 */
-  __IO uint32_t	dhr12r2;			/* 0x14 */
-  __IO uint32_t	dhr12l2;			/* 0x18 */
+  __IO uint32_t	dhr12r2;		/* 0x14 */
+  __IO uint32_t	dhr12l2;		/* 0x18 */
   __IO uint32_t	dhr8r2;			/* 0x1c */
-  __IO uint32_t	dhr12rd;			/* 0x20 */
-  __IO uint32_t	dhr12ld;			/* 0x24 */
+  __IO uint32_t	dhr12rd;		/* 0x20 */
+  __IO uint32_t	dhr12ld;		/* 0x24 */
   __IO uint32_t	dhr8rd;			/* 0x28 */
   __IO uint32_t	dor1;			/* 0x2c */
   __IO uint32_t	dor2;			/* 0x30 */
-  __IO uint32_t	sr;				/* 0x34 */
+  __IO uint32_t	sr;			/* 0x34 */
   __IO uint32_t	ccr;			/* 0x38 */
   __IO uint32_t	mcr;			/* 0x3e */
 #define MCR_MODE2_SHIFT			16
@@ -898,5 +762,53 @@ struct _stStm32l4_DAC {
 
 #define DAC_PTR	((struct _stStm32l4_DAC *) (APB1_BASE + 0x7400))
 
+
+/*******************************************
+ * 35 I2C
+ */
+#define I2C_MODULE_COUNT                (4)
+
+#include        "../../STM/include/stm32I2c.h"
+
+#define I2C1_PTR        ((stm32Dev_I2C *) (APB1_BASE + 0x5400))
+#define I2C2_PTR        ((stm32Dev_I2C *) (APB1_BASE + 0x5800))
+#define I2C3_PTR        ((stm32Dev_I2C *) (APB1_BASE + 0x5c00))
+#define I2C4_PTR        ((stm32Dev_I2C *) (APB1_BASE + 0x8400))
+
+
+/*******************************************
+ * 38 SPI
+ */
+#define SPI_MODULE_COUNT                (3)
+
+#include        "stm32Spi16.h"
+
+#define SPI1_PTR        ((stm32Dev_SPI *) (APB2_BASE + 0x3000))
+#define SPI2_PTR        ((stm32Dev_SPI *) (APB2_BASE + 0x3800))
+#define SPI3_PTR        ((stm32Dev_SPI *) (APB2_BASE + 0x3c00))
+
+
+/*******************************************
+ * 43 USB
+ */
+#define USB_MODULE_COUNT                (1)
+
+/* EP0 - EP7 */
+#define USB_MAX_EPIN            7
+#define USB_MAX_EPOUT           7
+
+#include        "stm32Usb16.h"
+
+#define USBSRAM8_PTR    (__IO uint8_t *) (APB1_BASE + 0x6c00))
+#define USBSRAM16_PTR   (__IO uint16_t *) (APB1_BASE + 0x6c00))
+#define USBSRAM_PTR     ((stm32Dev_USB_SRAM_Header *) (APB1_BASE + 0x6c00))
+#define USBSRAM_SIZE    (1024)
+
+#define USB_FS_PTR         ((stm32Dev_USB *) (APB1_BASE + 0x6800))
+
+#define UsbGetTxFifoPtr8(x)     ((__IO unit8_t  *)&USBSRAM8_PTR[USBSRAM_PTR->ep[x].txAddr])
+#define UsbGetRxFifoPtr8(x)     ((__IO unit8_t  *)&USBSRAM8_PTR[USBSRAM_PTR->ep[x].rxAddr])
+#define UsbGetTxFifoPtr16(x)    ((__IO unit16_t *)&USBSRAM8_PTR[USBSRAM_PTR->ep[x].txAddr])
+#define UsbGetRxFifoPtr16(x)    ((__IO unit16_t *)&USBSRAM8_PTR[USBSRAM_PTR->ep[x].rxAddr])
 
 #endif
