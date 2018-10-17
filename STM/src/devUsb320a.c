@@ -406,17 +406,6 @@ DevUsbInterrupt(devUsbSc_t *psc)
 
   if(!intr) goto fail;
 
-#if 0
-  /* avoid spurious interrupt */
-  if(__HAL_PCD_IS_INVALID_INTERRUPT(hpcd)) {
-    goto fail;
-  }
-
-  /* incorrect mode, acknowledge the interrupt */
-  if(intr & USB_GINTSTS_MMIS_MASK) {
-  }
-#endif
-
   /* ep out/in interrupt */
   if(intr & USB_GINTSTS_OEPINT_MASK) DevUsbInterruptEpOut(psc);
   if(intr & USB_GINTSTS_IEPINT_MASK) DevUsbInterruptEpIn(psc);
@@ -428,7 +417,7 @@ DevUsbInterrupt(devUsbSc_t *psc)
 
     if(psc->lpmState == LPM_L1) {
       psc->lpmState = LPM_L0;
-      /*HAL_PCDEx_LPM_Callback(hpcd, PCD_LPM_L0_ACTIVE);*/  /* return immediatly */
+      /* LPM_Callback(hpcd, LPM_L0_ACTIVE);*/  /* return immediatly */
     } else {
       p->PCGCCTL &= ~USB_PCGCCTL_STOPCLK_MASK;
       UsbdcoreCbBusState(psc->unit, USBDIF_BUSSTATE_RESUME);
@@ -462,7 +451,7 @@ DevUsbInterrupt(devUsbSc_t *psc)
   if(intr & USB_GINTSTS_LPMINT_MASK) {
     if(psc->lpmState == LPM_L0) {
       psc->lpmState = LPM_L1;
-      /*HAL_PCDEx_LPM_Callback(hpcd, PCD_LPM_L1_ACTIVE);*/  /* return immediatly */
+      /*LPM_Callback(hpcd, PCD_LPM_L1_ACTIVE);*/  /* return immediatly */
     } else {
       UsbdcoreCbBusState(psc->unit, USBDIF_BUSSTATE_SUSPEND);
     }
