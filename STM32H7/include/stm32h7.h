@@ -184,56 +184,7 @@ typedef struct {
  * 09 CRS
  */
 
-typedef struct {
-/*** 0x00  CRS CR */
-  __IO uint32_t         CR;
-#define CRS_CR_TRIM_SHIFT       (8)
-#define CRS_CR_TRIM_MASK        (0x3f << (CRS_CR_TRIM_SHIFT))
-#define CRS_CR_TRIM_VAL(x)      ((x) << (CRS_CR_TRIM_SHIFT))
-
-#define CRS_CR_AUTOTRIMEN_SHIFT (6)
-#define CRS_CR_AUTOTRIMEN_MASK  (1 << (CRS_CR_AUTOTRIMEN_SHIFT))
-#define CRS_CR_AUTOTRIMEN_NO    (0 << (CRS_CR_AUTOTRIMEN_SHIFT))
-#define CRS_CR_AUTOTRIMEN_YES   (1 << (CRS_CR_AUTOTRIMEN_SHIFT))
-#define CRS_CR_CEN_SHIFT        (5)
-#define CRS_CR_CEN_MASK         (1 << (CRS_CR_CEN_SHIFT))
-#define CRS_CR_CEN_NO           (0 << (CRS_CR_CEN_SHIFT))
-#define CRS_CR_CEN_YES          (1 << (CRS_CR_CEN_SHIFT))
-
-/*** 0x04  CRS CFGR */
-  __IO uint32_t         CFGR;
-#define CRS_CFGR_SYNCPOL_SHIFT      (31)
-#define CRS_CFGR_SYNCPOL_MASK       (1 << (CRS_CFGR_SYNCPOL_SHIFT))
-#define CRS_CFGR_SYNCPOL_RISING     (0 << (CRS_CFGR_SYNCPOL_SHIFT))
-#define CRS_CFGR_SYNCPOL_FALLING    (1 << (CRS_CFGR_SYNCPOL_SHIFT))
-#define CRS_CFGR_SYNCSRC_SHIFT      (28)
-#define CRS_CFGR_SYNCSRC_MASK       (3 << (CRS_CFGR_SYNCSRC_SHIFT))
-#define CRS_CFGR_SYNCSRC_USB2SOF    (0 << (CRS_CFGR_SYNCSRC_SHIFT))
-#define CRS_CFGR_SYNCSRC_LSE        (1 << (CRS_CFGR_SYNCSRC_SHIFT))
-#define CRS_CFGR_SYNCSRC_USB1SOF    (2 << (CRS_CFGR_SYNCSRC_SHIFT))
-#define CRS_CFGR_SYNCSRC_RESERVED   (3 << (CRS_CFGR_SYNCSRC_SHIFT))
-#define CRS_CFGR_SYNCDIV_SHIFT      (24)
-#define CRS_CFGR_SYNCDIV_MASK       (7 << (CRS_CFGR_SYNCDIV_SHIFT))
-#define CRS_CFGR_SYNCDIV_VAL(x)     ((x) << (CRS_CFGR_SYNCDIV_SHIFT))
-#define CRS_CFGR_SYNCDIV_DIV1       (0 << (CRS_CFGR_SYNCDIV_SHIFT))
-#define CRS_CFGR_SYNCDIV_DIV2       (1 << (CRS_CFGR_SYNCDIV_SHIFT))
-#define CRS_CFGR_SYNCDIV_DIV4       (2 << (CRS_CFGR_SYNCDIV_SHIFT))
-#define CRS_CFGR_SYNCDIV_DIV8       (3 << (CRS_CFGR_SYNCDIV_SHIFT))
-#define CRS_CFGR_SYNCDIV_DIV16      (4 << (CRS_CFGR_SYNCDIV_SHIFT))
-#define CRS_CFGR_SYNCDIV_DIV32      (5 << (CRS_CFGR_SYNCDIV_SHIFT))
-#define CRS_CFGR_SYNCDIV_DIV64      (6 << (CRS_CFGR_SYNCDIV_SHIFT))
-#define CRS_CFGR_SYNCDIV_DIV128     (7 << (CRS_CFGR_SYNCDIV_SHIFT))
-#define CRS_CFGR_FELIM_SHIFT        (16)
-#define CRS_CFGR_FELIM_MASK         (0xff << (CRS_CFGR_FELIM_SHIFT))
-#define CRS_CFGR_FELIM_VAL(x)       ((x) << (CRS_CFGR_FELIM_SHIFT))
-#define CRS_CFGR_RELOAD_SHIFT       (0)
-#define CRS_CFGR_RELOAD_MASK        (0xffff << (CRS_CFGR_RELOAD_SHIFT))
-#define CRS_CFGR_RELOAD_VAL(x)      (((x)-1) << (CRS_CFGR_RELOAD_SHIFT))
-#define CRS_CFGR_RELOAD_48MHZ       ((48000000/1000-1) << (CRS_CFGR_RELOAD_SHIFT))
-
-  __IO uint32_t         ISR;
-  __IO uint32_t         ICR;
-} stm32Dev_CRS;
+#include        "stm32Dev_CRS.h"
 
 #define CRS_PTR        ((stm32Dev_CRS *) (APB1_BASE + 0x8400))
 
