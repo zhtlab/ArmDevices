@@ -443,7 +443,7 @@ DevUsbInterrupt(devUsbSc_t *psc)
 
   /* enumeration interruption done Interrupt */
   if(intr & USB_GINTSTS_ENUMDNE_MASK) {
-    DevUsbInterruptEnumulate(psc);
+    DevUsbInterruptEnumerate(psc);
   }
 
 
@@ -564,7 +564,7 @@ DevUsbSetTRxFifo(int unit, usbdifDevFifo_t *pFifo)
 
 
 static int
-DevUsbInterruptEnumulate(devUsbSc_t *psc)
+DevUsbInterruptEnumerate(devUsbSc_t *psc)
 {
   stm32Dev_USB          *p;
 
@@ -602,7 +602,7 @@ DevUsbInterruptEnumulate(devUsbSc_t *psc)
   /*p->DCTL &= ~USB_DCTL_SDIS_MASK;*/
 #endif
 
-  UsbdcoreCbBusState(psc->unit, USBDIF_BUSSTATE_ENUMULATED | psc->speed);
+  UsbdcoreCbBusState(psc->unit, USBDIF_BUSSTATE_ENUMERATED | psc->speed);
 
 
   return 0;

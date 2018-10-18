@@ -92,7 +92,7 @@ int             DevUsbSetTRxFifo(int unit, usbdifDevFifo_t *pFifo);
 
 #ifdef  _DEV_USB320A_C_
 static void     DevUsbInterrupt(devUsbSc_t *psc);
-static int      DevUsbInterruptEnumulate(devUsbSc_t *psc);
+static int      DevUsbInterruptEnumerate(devUsbSc_t *psc);
 static void     DevUsbInterruptEpOut(devUsbSc_t *psc);
 static void     DevUsbInterruptEpIn(devUsbSc_t *psc);
 static void     DevUsbInterruptSof(devUsbSc_t *psc);
