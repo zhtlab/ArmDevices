@@ -61,6 +61,7 @@ typedef struct {
   uint16_t              ep0Mps;
   uint8_t               speed;
   uint8_t               addr;
+  uint16_t              cntr;           /* backup of CNTR reg */
 
   devUsbEp_t            out[USB_MAX_EPOUT];
   devUsbEp_t            in[USB_MAX_EPIN];
@@ -89,6 +90,7 @@ int             DevUsbSetTRxFifo(int unit, usbdifDevFifo_t *pFifo);
 #ifdef  _DEVUSB16_C_
 
 static void     DevUsbInterrupt(devUsbSc_t *psc);
+static int      DevUsbInterruptEnumerate(devUsbSc_t *psc);
 static void     DevUsbInterruptEpOut(devUsbSc_t *psc);
 static void     DevUsbInterruptEpInDone(devUsbSc_t *psc);
 static void     DevUsbInterruptSof(devUsbSc_t *psc);
@@ -103,8 +105,12 @@ static void     DevUsb16SetRxStatus(stm32Dev_USB *p, int num, uint16_t stat);
 
 static void     DevUsb16ClearRxCtr(stm32Dev_USB *p, int num);
 static void     DevUsb16ClearTxCtr(stm32Dev_USB *p, int num);
+static void     DevUsb16SetAddress(stm32Dev_USB *p, uint8_t addr);
 
+static int      DevUsbStartPacketOut(devUsbSc_t *psc, uint8_t epnum);
+static int      DevUsbStartPacketIn(devUsbSc_t *psc, uint8_t epnum);
 static int      DevUsbWritePacket(devUsbSc_t *psc, uint8_t epnum);
+
 
 #endif
 
