@@ -784,8 +784,8 @@ struct _stStm32l4_DAC {
 #include        "stm32Spi16.h"
 
 #define SPI1_PTR        ((stm32Dev_SPI *) (APB2_BASE + 0x3000))
-#define SPI2_PTR        ((stm32Dev_SPI *) (APB2_BASE + 0x3800))
-#define SPI3_PTR        ((stm32Dev_SPI *) (APB2_BASE + 0x3c00))
+#define SPI2_PTR        ((stm32Dev_SPI *) (APB1_BASE + 0x3800))
+#define SPI3_PTR        ((stm32Dev_SPI *) (APB1_BASE + 0x3c00))
 
 
 /*******************************************
