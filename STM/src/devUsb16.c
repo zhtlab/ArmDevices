@@ -404,7 +404,7 @@ DevUsbInterruptEpOut(devUsbSc_t *psc)
     } else {
       uint16_t  *pDst, *pSrc;
       pSrc = (uint16_t *)ptr;
-      pDst = (uint16_t *)ep->ptr + ep->cnt;
+      pDst = (uint16_t *)ep->ptr + ep->cnt/2;
       for(int i = 0; i < (size+1)/2; i++) *pDst++ = *pSrc++;
       psc->out[num].cnt += size;
 
