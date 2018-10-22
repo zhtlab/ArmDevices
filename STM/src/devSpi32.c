@@ -92,7 +92,7 @@ DevSpiInit(int unit, devSpiParam_t *param)
 
   /* clk mode */
   cfg2 |= ((psc->param.clkmode << SPI_CFG2_CPHA_SHIFT) &
-           (SPI_CFG2_CPOL_SHIFT | SPI_CFG2_CPHA_SHIFT));
+           (SPI_CFG2_CPOL_MASK | SPI_CFG2_CPHA_MASK));
 
   cfg2 |= SPI_CFG2_SSOM_YES | SPI_CFG2_SSM_YES | SPI_CFG2_MASTER_YES;
 
