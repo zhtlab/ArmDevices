@@ -95,208 +95,10 @@ enum irqNumbers {
 
 typedef int     IRQn_Type;
 
-/***
- * GPIO
- */
-#include        "../../STM/include/stm32Gpio.h"
-
-#define GPIO_PTR	((stm32Dev_GPIO *) ((AHB2_BASE) + 0x0000))
-/*#define GPIO		(GPIO_PTR[8])*/
-
-
-/***
- * RCC
- */
-#define RCC_CLOCK_LSI              32768
-#define RCC_CLOCK_HSI           16000000
-#define RCC_CLOCK_MSI_4MHZ       4000000
-
-#include        "stm32l4Rcc.h"
-
-#define RCC_PTR ((stm32Dev_RCC *) ((AHB1_BASE) + 0x1000))
-
-
-#define CONFIG_STM32L4_POWERSW_FUNCBASE	(0)
-
-struct _stStm32l4_IWDG {
-  __IO uint32_t		kr;
-#define KR_KEY_CLEAR		0xaaaa
-#define KR_KEY_SET		0x5555
-#define KR_KEY_START		0xcccc
-  __IO uint32_t		pr;
-#define PR_SHIFT		0
-#define PR_DIV4			(0 << (PR_SHIFT))
-#define PR_DIV8			(1 << (PR_SHIFT))
-#define PR_DIV16		(2 << (PR_SHIFT))
-#define PR_DIV32		(3 << (PR_SHIFT))
-#define PR_DIV64		(4 << (PR_SHIFT))
-#define PR_DIV128		(5 << (PR_SHIFT))
-#define PR_DIV256		(6 << (PR_SHIFT))
-#define PR_MASK			(7 << (PR_SHIFT))
-  __IO uint32_t		rlr;
-#define RLR_SHIFT		0
-#define RLR_MASK		(0xfff << (RLR_SHIFT))
-  __IO uint32_t		sr;
-#define SR_PVU_SHIFT		0
-#define SR_PVU_MASK		(1 << (SR_PVU_SHIFT))
-#define SR_RVU_SHIFT		1
-#define SR_RVU_MASK		(1 << (SR_RVU_SHIFT))
-#define SR_WVU_SHIFT		2
-#define SR_WVU_MASK		(1 << (SR_WVU_SHIFT))
-  __IO uint32_t		winr;
-#define WINR_SHIFT		0
-#define WINR_MASK		(0xfff << (WINR_SHIFT))
-};
-
-#if 0
-#define IWDG_PTR	((struct _stStm32l4_IWDG *) ((APB1_BASE) + 0x3000))
-#define IWDG	(*IWDG_PTR)
-#endif
-
-
-/*******************************************
- * 05 PWR
- */
-typedef struct {
-  __IO uint32_t         CR1;
-  __IO uint32_t         CR2;
-
-#define PWR_CR2_USV_SHIFT       10
-#define PWR_CR2_USV_MASK        (1 << (PWR_CR2_USV_SHIFT))
-#define PWR_CR2_USV_NO          (0 << (PWR_CR2_USV_SHIFT))
-#define PWR_CR2_USV_YES         (1 << (PWR_CR2_USV_SHIFT))
-  __IO uint32_t         CR3;
-
-  __IO uint32_t         CR4;
-
-} stm32Dev_PWR;
-
-#define PWR_PTR         ((stm32Dev_PWR *) (APB1_BASE + 0x7000))
-
-
-/*******************************************
- * 07 CRS
- */
-
-#include        "stm32Crs.h"
-
-#define CRS_PTR        ((stm32Dev_CRS *) (APB1_BASE + 0x6000))
-
 
 /*************************************************************
- * USART
+ * 03 FLASH
  */
-#include        "stm32Usart.h"
-
-#define USART1_PTR      ((stm32DEV_USART *) ((APB2_BASE) + 0x3800))
-#define USART_PTR       ((stm32Dev_USART *) ((APB1_BASE) + 0x4000))
-#define USART2_PTR      (&USART_PTR[1])
-#define USART3_PTR      (&USART_PTR[2])
-#define USART4_PTR      (&USART_PTR[3])
-#define LPUART1_PTR     ((stm32Dev_USART *) ((APB1_BASE) + 0x8000))
-
-
-/*************************************************************
- * DMACH
- */
-struct _stStm32l4_DMACH {
-  __IO uint32_t	ccr;
-#define CCR_MEM2MEM_SHIFT	14
-#define CCR_MEM2MEM_MASK	(1 << (CCR_MEM2MEM_SHIFT))
-#define CCR_MEM2MEM_NO		(0 << (CCR_MEM2MEM_SHIFT))
-#define CCR_MEM2MEM_YES		(1 << (CCR_MEM2MEM_SHIFT))
-#define CCR_PL_SHIFT		12
-#define CCR_PL_MASK		(1 << (CCR_PL_SHIFT))
-#define CCR_PL_LOW		(0 << (CCR_PL_SHIFT))
-#define CCR_PL_MID		(1 << (CCR_PL_SHIFT))
-#define CCR_PL_HID		(2 << (CCR_PL_SHIFT))
-#define CCR_PL_VERYHIGH		(3 << (CCR_PL_SHIFT))
-#define CCR_MSIZE_SHIFT		10
-#define CCR_MSIZE_MASK		(1 << (CCR_MSIZE_SHIFT))
-#define CCR_MSIZE_8BIT		(0 << (CCR_MSIZE_SHIFT))
-#define CCR_MSIZE_16BIT		(1 << (CCR_MSIZE_SHIFT))
-#define CCR_MSIZE_32BIT		(2 << (CCR_MSIZE_SHIFT))
-#define CCR_MSIZE_RESERVED	(3 << (CCR_MSIZE_SHIFT))
-#define CCR_PSIZE_SHIFT		8
-#define CCR_PSIZE_MASK		(1 << (CCR_PSIZE_SHIFT))
-#define CCR_PSIZE_8BIT		(0 << (CCR_PSIZE_SHIFT))
-#define CCR_PSIZE_16BIT		(1 << (CCR_PSIZE_SHIFT))
-#define CCR_PSIZE_32BIT		(2 << (CCR_PSIZE_SHIFT))
-#define CCR_PSIZE_RESERVED	(3 << (CCR_PL_SHIFT))
-#define CCR_MINC_SHIFT		7
-#define CCR_MINC_MASK		(1 << (CCR_MINC_SHIFT))
-#define CCR_MINC_NO		(0 << (CCR_MINC_SHIFT))
-#define CCR_MINC_YES		(1 << (CCR_MINC_SHIFT))
-#define CCR_PINC_SHIFT		6
-#define CCR_PINC_MASK		(1 << (CCR_PINC_SHIFT))
-#define CCR_PINC_NO		(0 << (CCR_PINC_SHIFT))
-#define CCR_PINC_YES		(1 << (CCR_PINC_SHIFT))
-#define CCR_CIRC_SHIFT		5
-#define CCR_CIRC_MASK		(1 << (CCR_CIRC_SHIFT))
-#define CCR_CIRC_NO		(0 << (CCR_CIRC_SHIFT))
-#define CCR_CIRC_YES		(1 << (CCR_CIRC_SHIFT))
-#define CCR_DIR_SHIFT		4
-#define CCR_DIR_MASK		(1 << (CCR_DIR_SHIFT))
-#define CCR_DIR_READ_PERI	(0 << (CCR_DIR_SHIFT))
-#define CCR_DIR_READ_MEM	(1 << (CCR_DIR_SHIFT))
-#define CCR_TEIE_SHIFT		3
-#define CCR_TEIE_MASK		(1 << (CCR_TEIE_SHIFT))
-#define CCR_TEIE_NO		(0 << (CCR_TEIE_SHIFT))
-#define CCR_TEIE_YES		(1 << (CCR_TEIE_SHIFT))
-#define CCR_HTIE_SHIFT		2
-#define CCR_HTIE_MASK		(1 << (CCR_HTIE_SHIFT))
-#define CCR_HTIE_NO		(0 << (CCR_HTIE_SHIFT))
-#define CCR_HTIE_YES		(1 << (CCR_HTIE_SHIFT))
-#define CCR_TCIE_SHIFT		1
-#define CCR_TCIE_MASK		(1 << (CCR_TCIE_SHIFT))
-#define CCR_TCIE_NO		(0 << (CCR_TCIE_SHIFT))
-#define CCR_TCIE_YES		(1 << (CCR_TCIE_SHIFT))
-#define CCR_EN_SHIFT		0
-#define CCR_EN_MASK		(1 << (CCR_EN_SHIFT))
-#define CCR_EN_NO		(0 << (CCR_EN_SHIFT))
-#define CCR_EN_YES		(1 << (CCR_EN_SHIFT))
-
-  __IO uint32_t	cndtr;
-#define CNDTR_MASK		(0xffff)
-  __IO uint32_t	cpar;
-  __IO uint32_t	cmar;
-  __IO uint32_t	reserved;
-};
-struct _stStm32l4_DMA {
-  __IO uint32_t	isr;
-#define ISR_TEIF_MASK(d)	(1 << (((d)<<2) + 3))
-#define ISR_HTIF_MASK(d)	(1 << (((d)<<2) + 2))
-#define ISR_TCIF_MASK(d)	(1 << (((d)<<2) + 1))
-#define ISR_GIF_MASK(d)		(1 << (((d)<<2) + 0))
-
-  __IO uint32_t	ifcr;
-#define ISR_CTEIF_CLEAR(d)	(1 << (((d)<<2) + 3))
-#define ISR_CHTIF_CLEAR(d)	(1 << (((d)<<2) + 2))
-#define ISR_CTCIF_CLEAR(d)	(1 << (((d)<<2) + 1))
-#define ISR_CGIF_CLEAR(d)	(1 << (((d)<<2) + 0))
-
-  struct _stStm32l4_DMACH ch[7];
-  __IO uint32_t	reserved90[5];
-  __IO uint32_t	cselr;
-#define CSELR_DMA_MASK(d)	(0xfUL << ((d)*4))
-#define CSELR_DMA_SEL(d, x)	((x)   << ((d)*4))
-  __IO uint32_t	reservedAC[213];
-};
-#define DMA_PTR	((struct _stStm32l4_DMA *)  ((AHB1_BASE) + 0x0000))
-/*#define DMA	(DMA_PTR[2])*/
-
-#define DMA_MODULE1	(0)
-#define DMA_MODULE2	(1)
-
-#define DMA_CH1		(0)
-#define DMA_CH2		(1)
-#define DMA_CH3		(2)
-#define DMA_CH4		(3)
-#define DMA_CH5		(4)
-#define DMA_CH6		(5)
-#define DMA_CH7		(6)
-
-
 
 struct _stStm32l4_FLASH {
   __IO uint32_t		acr;
@@ -433,17 +235,87 @@ struct _stStm32l4_FLASH {
 };
 #define FLASH_PTR	((struct _stStm32l4_FLASH *) ((AHB1_BASE) + 0x2000))
 
-/****
- * TIM
- */
-#include        "../../STM/include/stm32Tim.h"
 
-#define TIM1_PTR	((stm32Dev_TIM *) (APB2_BASE + 0x2c00))
-#define TIM2_PTR	((stm32Dev_TIM *) (APB1_BASE + 0x0000))
-#define TIM7_PTR	((stm32Dev_TIM *) (APB1_BASE + 0x1000))
-#define TIM8_PTR	((stm32Dev_TIM *) (APB1_BASE + 0x1400))
-#define TIM15_PTR	((stm32Dev_TIM *) (APB2_BASE + 0x4000))
-#define TIM16_PTR	((stm32Dev_TIM *) (APB2_BASE + 0x4400))
+/*******************************************
+ * 05 PWR
+ */
+typedef struct {
+  __IO uint32_t         CR1;
+  __IO uint32_t         CR2;
+
+#define PWR_CR2_USV_SHIFT       10
+#define PWR_CR2_USV_MASK        (1 << (PWR_CR2_USV_SHIFT))
+#define PWR_CR2_USV_NO          (0 << (PWR_CR2_USV_SHIFT))
+#define PWR_CR2_USV_YES         (1 << (PWR_CR2_USV_SHIFT))
+  __IO uint32_t         CR3;
+
+  __IO uint32_t         CR4;
+
+} stm32Dev_PWR;
+
+#define PWR_PTR         ((stm32Dev_PWR *) (APB1_BASE + 0x7000))
+
+
+/*************************************************************
+ * 06 RCC
+ */
+#define RCC_CLOCK_LSI              32768
+#define RCC_CLOCK_HSI           16000000
+#define RCC_CLOCK_MSI_4MHZ       4000000
+
+#include        "stm32l4Rcc.h"
+
+#define RCC_PTR ((stm32Dev_RCC *) ((AHB1_BASE) + 0x1000))
+
+
+#define CONFIG_STM32L4_POWERSW_FUNCBASE	(0)
+
+
+
+/*******************************************
+ * 07 CRS
+ */
+
+#include        "stm32Crs.h"
+
+#define CRS_PTR        ((stm32Dev_CRS *) (APB1_BASE + 0x6000))
+
+
+
+/*************************************************************
+ * 08 GPIO
+ */
+#include        "../../STM/include/stm32Gpio.h"
+
+#define GPIO_PTR	((stm32Dev_GPIO *) ((AHB2_BASE) + 0x0000))
+/*#define GPIO		(GPIO_PTR[8])*/
+
+
+/*************************************************************
+ * 11 DMACH
+ */
+#define DMA_MODULE_COUNT                (2)
+
+#include "stm32Dma4.h"
+
+#define DMA1_PTR ((stm32Dev_DMA *)  ((AHB1_BASE) + 0x0000))
+#define DMA2_PTR ((stm32Dev_DMA *)  ((AHB1_BASE) + 0x0400))
+
+
+#define DMA_MODULE1     (1)
+#define DMA_MODULE2     (2)
+
+#define DMA_CH1         (1)
+#define DMA_CH2         (2)
+#define DMA_CH3         (3)
+#define DMA_CH4         (4)
+#define DMA_CH5         (5)
+#define DMA_CH6         (6)
+#define DMA_CH7         (7)
+
+
+#define DMA_REQ_SPITX_TBL   {0, 0x31, 0x51, 0xa3}
+#define DMA_REQ_SPIRX_TBL   {0, 0x21, 0x41, 0x93}
 
 
 
@@ -764,6 +636,55 @@ struct _stStm32l4_DAC {
 
 
 /*******************************************
+ * 26,27,28,29 TIM
+ */
+#include        "../../STM/include/stm32Tim.h"
+
+#define TIM1_PTR	((stm32Dev_TIM *) (APB2_BASE + 0x2c00))
+#define TIM2_PTR	((stm32Dev_TIM *) (APB1_BASE + 0x0000))
+#define TIM7_PTR	((stm32Dev_TIM *) (APB1_BASE + 0x1000))
+#define TIM8_PTR	((stm32Dev_TIM *) (APB1_BASE + 0x1400))
+#define TIM15_PTR	((stm32Dev_TIM *) (APB2_BASE + 0x4000))
+#define TIM16_PTR	((stm32Dev_TIM *) (APB2_BASE + 0x4400))
+
+
+/*************************************************************
+ * 32 IWDG
+ */
+struct {
+  __IO uint32_t		KR;
+#define KR_KEY_CLEAR		0xaaaa
+#define KR_KEY_SET		0x5555
+#define KR_KEY_START		0xcccc
+  __IO uint32_t		PR;
+#define PR_SHIFT		0
+#define PR_DIV4			(0 << (PR_SHIFT))
+#define PR_DIV8			(1 << (PR_SHIFT))
+#define PR_DIV16		(2 << (PR_SHIFT))
+#define PR_DIV32		(3 << (PR_SHIFT))
+#define PR_DIV64		(4 << (PR_SHIFT))
+#define PR_DIV128		(5 << (PR_SHIFT))
+#define PR_DIV256		(6 << (PR_SHIFT))
+#define PR_MASK			(7 << (PR_SHIFT))
+  __IO uint32_t		RLR;
+#define RLR_SHIFT		0
+#define RLR_MASK		(0xfff << (RLR_SHIFT))
+  __IO uint32_t		SR;
+#define SR_PVU_SHIFT		0
+#define SR_PVU_MASK		(1 << (SR_PVU_SHIFT))
+#define SR_RVU_SHIFT		1
+#define SR_RVU_MASK		(1 << (SR_RVU_SHIFT))
+#define SR_WVU_SHIFT		2
+#define SR_WVU_MASK		(1 << (SR_WVU_SHIFT))
+  __IO uint32_t		WINR;
+#define WINR_SHIFT		0
+#define WINR_MASK		(0xfff << (WINR_SHIFT))
+} stm32Dev_IWDG4;
+
+#define IWDG_PTR        ((stm32Dev_IWDG4 *) ((APB1_BASE) + 0x3000))
+
+
+/*******************************************
  * 35 I2C
  */
 #define I2C_MODULE_COUNT                (4)
@@ -774,6 +695,19 @@ struct _stStm32l4_DAC {
 #define I2C2_PTR        ((stm32Dev_I2C *) (APB1_BASE + 0x5800))
 #define I2C3_PTR        ((stm32Dev_I2C *) (APB1_BASE + 0x5c00))
 #define I2C4_PTR        ((stm32Dev_I2C *) (APB1_BASE + 0x8400))
+
+
+/*************************************************************
+ * 36 USART
+ */
+#include        "stm32Usart.h"
+
+#define USART1_PTR      ((stm32DEV_USART *) ((APB2_BASE) + 0x3800))
+#define USART_PTR       ((stm32Dev_USART *) ((APB1_BASE) + 0x4000))
+#define USART2_PTR      (&USART_PTR[1])
+#define USART3_PTR      (&USART_PTR[2])
+#define USART4_PTR      (&USART_PTR[3])
+#define LPUART1_PTR     ((stm32Dev_USART *) ((APB1_BASE) + 0x8000))
 
 
 /*******************************************
@@ -799,8 +733,8 @@ struct _stStm32l4_DAC {
 
 #include        "stm32Usb16.h"
 
-#define USBSRAM8_PTR    (__IO uint8_t *) (APB1_BASE + 0x6c00))
-#define USBSRAM16_PTR   (__IO uint16_t *) (APB1_BASE + 0x6c00))
+#define USBSRAM8_PTR    ((__IO uint8_t *) (APB1_BASE + 0x6c00))
+#define USBSRAM16_PTR   ((__IO uint16_t *) (APB1_BASE + 0x6c00))
 #define USBSRAM_PTR     ((stm32Dev_USB_SRAM_Header *) (APB1_BASE + 0x6c00))
 #define USBSRAM_SIZE    (1024)
 
