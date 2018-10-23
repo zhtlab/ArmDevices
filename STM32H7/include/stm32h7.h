@@ -184,7 +184,7 @@ typedef struct {
  * 09 CRS
  */
 
-#include        "stm32Dev_CRS.h"
+#include        "stm32Crs.h"
 
 #define CRS_PTR        ((stm32Dev_CRS *) (APB1_BASE + 0x8400))
 
