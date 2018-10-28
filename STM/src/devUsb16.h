@@ -26,6 +26,7 @@
 
 
 typedef struct {
+  uint32_t              dbuf;
   uint8_t               dma: 1;
   uint8_t               sof: 1;
   uint8_t               vbus: 1;
@@ -52,6 +53,7 @@ typedef struct {
 
   uint8_t               unit;
   stm32Dev_USB          *dev;
+  uint32_t              dbuf;              /* double buffer */
 
   usbifSetup_t          setup;
   uint8_t               lpmState;
@@ -72,7 +74,7 @@ struct _stDevUsb {
 };
 
 
-int             DevUsbInit(int unit, devUsbParam_t *param);
+int             DevUsbInit(int unit, devUsbParam_t *param, usbdifDevFifo_t *pFifo);
 
 void            DevUsbInterruptUsb1(void);
 void            DevUsbInterruptUsb2(void);
@@ -85,14 +87,14 @@ int             DevUsbPrepareReceive(int unit, uint8_t epnum, const uint8_t *ptr
 int             DevUsbSetStall(int unit, uint8_t epnum);
 int             DevUsbSetAddress(int unit, int address);
 
-int             DevUsbSetTRxFifo(int unit, usbdifDevFifo_t *pFifo);
+int             DevUsbSetTRxFifo(devUsbSc_t *psc, usbdifDevFifo_t *pFifo);
 
 #ifdef  _DEVUSB16_C_
 
 static void     DevUsbInterrupt(devUsbSc_t *psc);
 static int      DevUsbInterruptEnumerate(devUsbSc_t *psc);
-static void     DevUsbInterruptEpOut(devUsbSc_t *psc);
-static void     DevUsbInterruptEpInDone(devUsbSc_t *psc);
+static void     DevUsbInterruptEpOut(devUsbSc_t *psc, int num);
+static void     DevUsbInterruptEpInDone(devUsbSc_t *psc, int num);
 static void     DevUsbInterruptSof(devUsbSc_t *psc);
 
 static int      DevUsbGetBusSpeed(devUsbSc_t *psc);
@@ -100,16 +102,24 @@ static void     DevUsbFlushFifoRx(devUsbSc_t *psc, int num);
 static void     DevUsbFlushFifoTx(devUsbSc_t *psc, int num);
 
 
+static void     DevUsb16ClearEp(stm32Dev_USB *p, int num);
+static void     DevUsb16ClearDtog(stm32Dev_USB *p, int num);
+static void     DevUsb16SetEpNumType(stm32Dev_USB *p, int num, int type);
 static void     DevUsb16SetTxStatus(stm32Dev_USB *p, int num, uint16_t stat);
 static void     DevUsb16SetRxStatus(stm32Dev_USB *p, int num, uint16_t stat);
-
-static void     DevUsb16ClearRxCtr(stm32Dev_USB *p, int num);
 static void     DevUsb16ClearTxCtr(stm32Dev_USB *p, int num);
+static void     DevUsb16ClearRxCtr(stm32Dev_USB *p, int num);
+static void     DevUsb16ToggleDtogRx(stm32Dev_USB *p, int num);
+static void     DevUsb16ToggleDtogTx(stm32Dev_USB *p, int num);
+static void     DevUsb16ToggleSwBufTx(stm32Dev_USB *p, int num);
+static void     DevUsb16ToggleSwBufRx(stm32Dev_USB *p, int num);
+static void     DevUsb16DoubleBufEnable(stm32Dev_USB *p, int num);
+static void     DevUsb16DoubleBufDisable(stm32Dev_USB *p, int num);
 static void     DevUsb16SetAddress(stm32Dev_USB *p, uint8_t addr);
 
 static int      DevUsbStartPacketOut(devUsbSc_t *psc, uint8_t epnum);
 static int      DevUsbStartPacketIn(devUsbSc_t *psc, uint8_t epnum);
-static int      DevUsbWritePacket(devUsbSc_t *psc, uint8_t epnum);
+static int      DevUsbWritePacket(devUsbSc_t *psc, uint8_t epnum, int fill_dbuf);
 
 
 #endif
