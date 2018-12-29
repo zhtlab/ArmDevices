@@ -53,8 +53,12 @@ DevCounterInit(int unit, devCounterParam_t *param)
 
   if(unit == -1) {
     memset(&counter, 0, sizeof(counter));
+#ifdef TIM1_PTR
     counter.sc[1].dev  = TIM1_PTR;
+#endif
+#ifdef TIM2_PTR
     counter.sc[2].dev  = TIM2_PTR;
+#endif
 #ifdef TIM3_PTR
     counter.sc[3].dev  = TIM3_PTR;
 #endif

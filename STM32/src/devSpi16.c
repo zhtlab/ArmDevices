@@ -255,7 +255,7 @@ DevSpiRecvPio(devSpiSc_t *psc, uint8_t *ptr, int size)
 
   /* flush rx buffer */
   while(p->SR & SPI_SR_RXNE_MASK) {
-    *(__IO uint8_t *)p->DR;
+    *(__IO uint8_t *)&p->DR;
   }
   p->SR;
 
@@ -359,7 +359,7 @@ DevSpiRecvDma(devSpiSc_t *psc, uint8_t *ptr, int size)
 
   /* flush rx buffer */
   while(p->SR & SPI_SR_RXNE_MASK) {
-    *(__IO uint8_t *)p->DR;
+    *(__IO uint8_t *)&p->DR;
   }
   p->SR;
 

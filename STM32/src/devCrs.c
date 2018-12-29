@@ -30,14 +30,6 @@ int
 DevCrsInit(devCrsParam_t *param)
 {
   uint32_t      cfgr;
-#if 0
-  /* Clock recovery base clock is set enable */
-  RCC_PTR->APB1HENR |= (RCC_APB1HENR_CRSEN_YES);
-
-  /* reset once */
-  (RCC_PTR->APB1HRSTR) |=  RCC_APB1HRSTR_CRSRST_YES;
-  (RCC_PTR->APB1HRSTR) &= ~RCC_APB1HRSTR_CRSRST_MASK;
-#endif
 
   /* configuration */
   cfgr = (CRS_CFGR_SYNCPOL_RISING |
@@ -52,10 +44,31 @@ DevCrsInit(devCrsParam_t *param)
   CRS_PTR->CFGR = cfgr;
 
   /* set the trim value */
-  CRS_PTR->CR = (CRS_CR_TRIM_VAL(32));
-
+  CRS_PTR->CR  = (CRS_CR_TRIM_VAL(32));
+  /* interrupt enable */
+  //CRS_PTR->CR |= CRS_CR_SYNCWARNIE_YES | CRS_CR_ERRIE_YES;
   /* start CRS */
   CRS_PTR->CR |= (CRS_CR_AUTOTRIMEN_YES | CRS_CR_CEN_YES);
 
   return 0;
+}
+
+
+void
+DevCrsInterrupt(void)
+{
+  uint32_t      intr;
+  intr = CRS_PTR->ISR;
+  CRS_PTR->ICR = intr & CRS_ICR_ALL_MASK;
+
+  if(intr & CRS_ISR_ESYNCF_MASK) {
+  }
+  if(intr & CRS_ISR_ERRF_MASK) {
+  }
+  if(intr & CRS_ISR_SYNCWARNF_MASK) {
+  }
+  if(intr & CRS_ISR_SYNCOKF_MASK) {
+  }
+
+  return;
 }

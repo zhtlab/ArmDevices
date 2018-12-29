@@ -48,7 +48,13 @@ struct _stDevUsb        devUsb;
                      USBDCORECB_REQ_DATAINDONE, (num), USBDIF_NULL)
 #endif
 
-
+#define DevUsbIsDoubleBufferMode(p, num)  (  (p)->EP[(num)].R & USB_EP_EP_KIND_MASK)
+#define DevUsbIsSwBufTx0(p, num)          (!((p)->EP[(num)].R & USB_EP_SW_BUF_TX_MASK))
+#define DevUsbIsSwBufTx1(p, num)          (  (p)->EP[(num)].R & USB_EP_SW_BUF_TX_MASK )
+#define DevUsbIsSwBufRx0(p, num)          (!((p)->EP[(num)].R & USB_EP_SW_BUF_RX_MASK))
+#define DevUsbIsSwBufRx1(p, num)          (  (p)->EP[(num)].R & USB_EP_SW_BUF_RX_MASK )
+#define DevUsbIsDtogRx0(p, num)           (!((p)->EP[(num)].R & USB_EP_DTOG_RX_MASK))
+#define DevUsbIsDtogRx1(p, num)           (  (p)->EP[(num)].R & USB_EP_DTOG_RX_MASK )
 
 int
 DevUsbInit(int unit, devUsbParam_t *param, usbdifDevFifo_t *pSize)
@@ -153,11 +159,12 @@ DevUsbOpenEp(int unit, uint8_t epnum, int eptype, int size)
     /* Double buffer */
     DevUsb16SetEpNumType(p, num, type);
     if(epnum & 0x80) {
+      DevUsb16DoubleBufEnable(p, num);
       DevUsb16ClearDtog(p, num);
       DevUsb16SetTxStatus(p, num, USB_EP_STAT_TX_NAK);
     } else {
       DevUsb16DoubleBufEnable(p, num);
-      DevUsb16ToggleSwBufRx(p, num);
+      /*DevUsb16ToggleSwBufRx(p, num);*/
       DevUsb16SetRxStatus(p, num, USB_EP_STAT_RX_DISABLED);
     }
   }
@@ -200,6 +207,10 @@ DevUsbTransmit(int unit, uint8_t epnum, const uint8_t *ptr, int size)
   uint16_t              stat;
 
   psc = &devUsb.sc[unit];
+
+  while(psc->busy);
+  psc->busy = 1;
+
   p = psc->dev;
   num = epnum & 0x7f;
 
@@ -209,7 +220,8 @@ DevUsbTransmit(int unit, uint8_t epnum, const uint8_t *ptr, int size)
   psc->in[num].cnt = 0;
   psc->in[num].fSent = 0;
 
-  DevUsbWritePacket(psc, num | 0x80, 1);
+  DevUsbStartPacketIn(psc, num | 0x80);
+  DevUsbWritePacket(psc, num | 0x80);
 
   return 0;
 }
@@ -231,6 +243,9 @@ DevUsbPrepareReceive(int unit, uint8_t epnum, const uint8_t *ptr, int size)
   psc->out[num].size = size;
   psc->out[num].cnt  = 0;
 
+  if(DevUsbIsDoubleBufferMode(p, num)) {
+    DevUsb16ToggleSwBufRx(p, num);
+  }
   DevUsb16SetRxStatus(p, num, USB_EP_STAT_RX_VALID);
 
   return 0;
@@ -283,14 +298,13 @@ DevUsbInterrupt(devUsbSc_t *psc)
       DevUsbInterruptEpOut(psc, num);
     } else {
       DevUsbInterruptEpInDone(psc, num);
+      psc->busy = 0;
     }
   }
   p->ISTR &= ~intr;
 
   /* SOF interrupt */
   if(intr & USB_CNTR_SOF_MASK) DevUsbInterruptSof(psc);
-
-
   /* resume Interrupt */
   if(intr & USB_CNTR_WKUP_MASK) {
     p->CNTR &= ~USB_CNTR_LPMODE_MASK;
@@ -312,7 +326,7 @@ DevUsbInterrupt(devUsbSc_t *psc)
 
   /* LPM interrupt */
   if(intr & USB_CNTR_L1REQ_MASK) {
-    printf("L1REQ \r\n");
+    puts("L1REQ\n");
     if(psc->lpmState == DEVUSB_LPM_L0) {
       psc->lpmState = DEVUSB_LPM_L1;
       /*  LPM_Callback(hpcd, LPM_L1_ACTIVE);  */  /* return immediatly */
@@ -344,11 +358,11 @@ DevUsbInterrupt(devUsbSc_t *psc)
 #if 0
   /* overflow interrupt */
   if(intr & USB_CNTR_PMAOVR_MASK) {
-    printf("xxxx intr PMAOVR\r\n");
+    puts("xxxx intr PMAOVR\n");
   }
   /* error interrupt */
   if(intr & USB_CNTR_ERR_MASK) {
-    printf("xxxx intr ERR\r\n");
+    puts("xxxx intr ERR\n");
   }
 #endif
 
@@ -367,8 +381,8 @@ DevUsbInterruptEnumerate(devUsbSc_t *psc)
   psc->speed  = USB_SPEED_FULL;
   psc->ep0Mps = USB_FS_MAX_PACKET_SIZE;
 
-  DevUsbCloseEp(unit,    0);
-  DevUsbCloseEp(unit, 0x80);
+  DevUsbCloseEp(psc->unit,    0);
+  DevUsbCloseEp(psc->unit, 0x80);
 
   DevUsbOpenEp(unit,    0, USBIF_EP_CTRL, psc->out[0].maxsize);
   DevUsbOpenEp(unit, 0x80, USBIF_EP_CTRL, psc->in[0].maxsize);
@@ -382,7 +396,7 @@ DevUsbInterruptEpOut(devUsbSc_t *psc, int num)
   stm32Dev_USB          *p;
 
   uint32_t              epintr, epnum, epbit;
-  __IO uint16_t         *regep;
+  uint16_t              regep;
 
   int                   size;
   uint8_t               *ptr;
@@ -390,25 +404,36 @@ DevUsbInterruptEpOut(devUsbSc_t *psc, int num)
 
   p = psc->dev;
 
-  regep= &p->EP[num].R;
+  regep= p->EP[num].R;
   ep = &psc->out[num];
-  if(!(psc->dbuf & (1<<num))) {
-    size = USBSRAM_PTR->ep[num].rxCnt & USB_COUNT_RX_COUNT_MASK;
-    ptr  = (uint8_t *)USBSRAM_PTR + USBSRAM_PTR->ep[num].rxAddr;
-  } else {
-    if(p->EP[num].R & USB_EP_SW_BUF_RX_MASK) {
-      size = USBSRAM_PTR->ep[num].txCnt & USB_COUNT_RX_COUNT_MASK;
-      ptr  = (uint8_t *)USBSRAM_PTR + USBSRAM_PTR->ep[num].txAddr;
-    } else {
-      size = USBSRAM_PTR->ep[num].rxCnt & USB_COUNT_RX_COUNT_MASK;
-      ptr  = (uint8_t *)USBSRAM_PTR + USBSRAM_PTR->ep[num].rxAddr;
-    }
-    DevUsb16ToggleSwBufRx(p, num);
-  }
 
   DevUsb16ClearRxCtr(p, num);
 
-  if(*regep & USB_EP_SETUP_MASK) {
+  /* get the recv packet buffer pointer and size */
+  ptr  = (uint8_t *)USBSRAM_PTR;
+  if(!DevUsbIsDoubleBufferMode(p, num)) {
+    size  = USBSRAM_PTR->ep[num].rxCnt;
+    ptr  += USBSRAM_PTR->ep[num].rxAddr;
+  } else {
+    if(DevUsbIsDtogRx0(p, num)) {
+      size  = USBSRAM_PTR->ep[num].rxCnt;
+      ptr  += USBSRAM_PTR->ep[num].rxAddr;
+    } else {
+      size  = USBSRAM_PTR->ep[num].txCnt;
+      ptr  += USBSRAM_PTR->ep[num].txAddr;
+    }
+    if((!(regep & USB_EP_SETUP_MASK) &&
+        (psc->out[num].cnt+psc->out[num].maxsize) < psc->out[num].size)
+       || (regep & USB_EP_EP_TYPE_MASK) == USB_EP_EP_TYPE_ISO) {
+      DevUsb16ToggleSwBufRx(p, num);
+    }
+  }
+  size  &= USB_COUNT_RX_COUNT_MASK;
+
+  /* copy the recv data to the local memory,
+   * then call the upper routine, if need
+   */
+  if(regep & USB_EP_SETUP_MASK) {
     memcpy(&psc->setup, ptr, 8);
     if((psc->setup.bmRequest & USB_BMREQ_DIR_MASK)  /* IN and OUT w/o data */
        || psc->setup.wLength == 0) {
@@ -436,9 +461,8 @@ DevUsbInterruptEpOut(devUsbSc_t *psc, int num)
       psc->out[num].cnt += size;
 
       /* ep >= 1 && OUT */
-      if((*regep & USB_EP_EP_TYPE_MASK) == USB_EP_EP_TYPE_ISO) {
-          UsbdcoreCbDataOut(psc->unit, num, size);
-
+      if((regep & USB_EP_EP_TYPE_MASK) == USB_EP_EP_TYPE_ISO) {
+        UsbdcoreCbDataOut(psc->unit, num, size);
       } else {
         if(ep->cnt < ep->maxsize) {
           UsbdcoreCbDataOut(psc->unit, num, size);
@@ -446,13 +470,15 @@ DevUsbInterruptEpOut(devUsbSc_t *psc, int num)
           UsbdcoreCbDataOut(psc->unit, num, ep->size);
         } else {
           /* continue to receive data */
-          DevUsb16SetRxStatus(p, num, USB_EP_STAT_RX_VALID);
+          if(!DevUsbIsDoubleBufferMode(p, num)) {
+            DevUsb16SetRxStatus(p, num, USB_EP_STAT_RX_VALID);
+          }
         }
       }
     }
   }
 
-  return;
+ return;
 }
 
 
@@ -460,29 +486,35 @@ static void
 DevUsbInterruptEpInDone(devUsbSc_t *psc, int num)
 {
   stm32Dev_USB          *p;
+  uint16_t      intr;
+  static uint16_t vvv = 0, vvv2=0;
 
   p = psc->dev;
+  intr = p->EP[num].R;
   DevUsb16ClearTxCtr(p, num);
 
 
   if(psc->in[num].fSent) {
-    if(!(p->EP[num].R & USB_EP_EP_KIND_MASK)) {
+    if(!DevUsbIsDoubleBufferMode(p, num)) {
       UsbdcoreCbDataInDone(psc->unit, num | 0x80);
     } else {
+
       if(psc->in[num].fSent == 1) {
         psc->in[num].fSent++;
 
-        DevUsb16ToggleSwBufTx(p, num);
+        if(psc->in[num].size <= psc->in[num].maxsize) {
+          DevUsb16SetTxStatus(p, num, USB_EP_STAT_TX_NAK);
+          UsbdcoreCbDataInDone(psc->unit, num | 0x80);
+        }
 
       } else if(psc->in[num].fSent == 2) {
-        DevUsb16DoubleBufDisable(p, num);
-        if((psc->dbuf & (1<<num))) DevUsb16SetTxStatus(p, num, USB_EP_STAT_TX_NAK);
+        DevUsb16SetTxStatus(p, num, USB_EP_STAT_TX_NAK);
         UsbdcoreCbDataInDone(psc->unit, num | 0x80);
       }
     }
 
   } else {
-    DevUsbWritePacket(psc, num | 0x80, 0);
+    DevUsbWritePacket(psc, num | 0x80);
   }
 
   /* addres setting */
@@ -669,7 +701,7 @@ DevUsbShowTRxFifo(int unit)
 
   ramep = &USBSRAM_PTR->ep[0];
   for(int i = 0; i <= USB_MAX_EPIN; i++) {
-    printf("  EP%d, tx_addr %x(len %x)  rx_addr %x(len %x)\r\n", i,
+    printf("  EP%d, tx_addr %x(len %x)  rx_addr %x(len %x)\n", i,
            ramep->txAddr, ramep->txCnt, ramep->rxAddr, ramep->rxCnt);
     ramep++;
   }
@@ -703,26 +735,26 @@ end:
   return 0;
 }
 #endif
-#if 0
 static int
 DevUsbStartPacketIn(devUsbSc_t *psc, uint8_t epnum)
 {
   stm32Dev_USB          *p;
   int                   num;
+  int                   val;
 
   num = epnum & 0x7f;
-  if(psc->in[num].fSent) goto end;
 
   p = psc->dev;
 
-  size = psc->in[num].size;
+  if(DevUsbIsDoubleBufferMode(p, num) && psc->in[num].size > psc->in[num].maxsize) {
+    psc->fillDbuf = 1;
+  }
 
 end:
   return 0;
 }
-#endif
 static int
-DevUsbWritePacket(devUsbSc_t *psc, uint8_t epnum, int fill_dbuf)
+DevUsbWritePacket(devUsbSc_t *psc, uint8_t epnum)
 {
   stm32Dev_USB          *p;
 
@@ -732,97 +764,81 @@ DevUsbWritePacket(devUsbSc_t *psc, uint8_t epnum, int fill_dbuf)
 
   uint16_t              *pBuf, *pSrc;
   uint16_t              stat;
+  int                   off;
 
   p = psc->dev;
   num = epnum & 0x7f;
 
+  while(1) {
+    size = psc->in[num].size;
 
-  if(psc->in[num].size <= 0x40 || !(psc->dbuf & (1<<num))) {
-    fill_dbuf = 0;
-  }
+    if(size > 0) {                /* send data */
+      size -= psc->in[num].cnt;
+      if(size > psc->in[num].maxsize) {
+        size = psc->in[num].maxsize;
 
+      } else {
+        psc->in[num].fSent = 1;
+      }
 
-again:
-  size = psc->in[num].size;
-
-  if(size > 0) {                /* send data */
-    size -= psc->in[num].cnt;
-    if(size > psc->in[num].maxsize) {
-      size = psc->in[num].maxsize;
-
-    } else {
-      psc->in[num].fSent = 1;
-      stat = USB_EP_STAT_TX_NAK;
-    }
-
-    if(size > 0) {
-      uint8_t   *ptr;
-
-
-      if(!(p->EP[num].R & USB_EP_EP_KIND_MASK)) {
-        if(fill_dbuf) {
-          uint16_t              val;
-          DevUsb16DoubleBufEnable(p, num);
-          val  = p->EP[num].R & USB_EP_DTOG_MASK;
-          if(val == USB_EP_DTOG_TX || val == USB_EP_DTOG_RX) {
-            DevUsb16ToggleSwBufTx(p, num);
+      if(size > 0) {
+        pBuf = (uint16_t *)USBSRAM_PTR;
+        if(!DevUsbIsDoubleBufferMode(p, num)) {
+          off = USBSRAM_PTR->ep[num].txAddr;
+        } else {
+          if(DevUsbIsSwBufTx0(p, num)) {
+            off = USBSRAM_PTR->ep[num].txAddr;
+          } else {
+            off = USBSRAM_PTR->ep[num].rxAddr;
           }
         }
-      }
 
-
-      if(!(p->EP[num].R & USB_EP_EP_KIND_MASK)) {
-        pBuf = (uint16_t *)USBSRAM_PTR + USBSRAM_PTR->ep[num].txAddr/2;
-        stat = USB_EP_STAT_TX_VALID;
-      } else {
-        if(!(p->EP[num].R & USB_EP_DTOG_RX_MASK)) {
-          pBuf = (uint16_t *)USBSRAM_PTR + USBSRAM_PTR->ep[num].txAddr/2;
+        /* data fill */
+        pSrc = (uint16_t *)psc->in[num].ptr;
+        if(!((uint32_t)pSrc & 1)) {
+          pBuf += (off>>1);
+          for(int i = 0; i < (size+1)/2; i++) pBuf[i] = pSrc[i];
         } else {
-          pBuf = (uint16_t *)USBSRAM_PTR + USBSRAM_PTR->ep[num].rxAddr/2;
+          uint8_t       *pBuf8, *pSrc8;
+          pSrc8 = (uint8_t *)pSrc;
+          pBuf8 = (uint8_t *)pBuf + off;
+          for(int i = 0; i < size; i++) pBuf8[i] = pSrc8[i];
         }
-        stat = USB_EP_STAT_TX_VALID;
-      }
+        psc->in[num].ptr += size;
+        psc->in[num].cnt += size;
 
-      /* data fill */
-      pSrc = (uint16_t *)psc->in[num].ptr;
-      for(int i = 0; i < (size+1)/2; i++) pBuf[i] = pSrc[i];
-      if(num == 4 && psc->in[num].size > 1024) pBuf[0] = psc->in[num].cnt;   /* adhoc !! delete !! */
-      psc->in[num].ptr += size;
-      psc->in[num].cnt += size;
+      }
+      stat = USB_EP_STAT_TX_VALID;
+
+    } else if(size == 0) {        /* send STATUS */
+      size = 0;
+      stat = USB_EP_STAT_TX_VALID;
+      psc->in[num].fSent = 1;
+
+    } else {                      /* send STALL  (size < 0) */
+      size = 0;
+      stat = USB_EP_STAT_TX_STALL;
+      psc->in[num].fSent = 1;
 
     }
 
-  } else if(size == 0) {        /* send STATUS */
-    size = 0;
-    stat = USB_EP_STAT_TX_VALID;
-    psc->in[num].fSent = 1;
 
-  } else {                      /* send STALL  (size < 0) */
-    size = 0;
-    stat = USB_EP_STAT_TX_STALL;
-    psc->in[num].fSent = 1;
-
-  }
-
-
-  /* write the data size */
-  if(!(p->EP[num].R & USB_EP_EP_KIND_MASK)) {
-    USBSRAM_PTR->ep[num].txCnt = size;
-  } else {
-    if(!(p->EP[num].R & USB_EP_DTOG_RX_MASK)) {
+    /* write the data size */
+    if(!DevUsbIsDoubleBufferMode(p, num)) {
       USBSRAM_PTR->ep[num].txCnt = size;
     } else {
-      USBSRAM_PTR->ep[num].rxCnt = size;
+      if(DevUsbIsSwBufTx0(p, num)) {
+        USBSRAM_PTR->ep[num].txCnt = size;
+      } else {
+        USBSRAM_PTR->ep[num].rxCnt = size;
+      }
+      DevUsb16ToggleSwBufTx(p, num);
     }
-    DevUsb16ToggleSwBufTx(p, num);
-  }
 
-  DevUsb16SetTxStatus(p, num, stat);
+    DevUsb16SetTxStatus(p, num, stat);
 
-
-  if(fill_dbuf) {
-    fill_dbuf = 0;
-    goto again;
+    if(!psc->fillDbuf) break;
+    psc->fillDbuf = 0;
   }
 
 end:

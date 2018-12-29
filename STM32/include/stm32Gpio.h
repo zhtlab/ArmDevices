@@ -25,7 +25,7 @@
 #define _STM32Gpio_H_
 
 
-struct _stStm32l4_GPIO {
+typedef struct {
   __IO uint32_t		MODER;
 #define MODE_INPUT(x)		(0 << ((x)*2))
 #define MODE_OUTPUT(x)		(1 << ((x)*2))
@@ -57,9 +57,13 @@ struct _stStm32l4_GPIO {
 #define ODR_1(x)		( 1  << (x))
 #define ODR_X(x, d)		((d) << (x))
 #define ODR_MASK(x)		( 1  << (x))
+#ifdef  STM32GPIO_BRR_28H_EXIST
+  __IO uint32_t		BSRR;
+#else
   __IO uint16_t		BSRR;
-#define BSRR_SET(x)		( 1  << (x))
   __IO uint16_t		BRR;
+#endif
+#define BSRR_SET(x)		( 1  << (x))
 #define BRR_RESET(x)		( 1  << (x))
   __IO uint32_t		LCKR;
 #define LCKR_LCKK_SHIFT		(16)
@@ -111,16 +115,101 @@ struct _stStm32l4_GPIO {
 #define AFH_14		6
 #define AFH_15		7
 
+#ifdef  STM32GPIO_BRR_28H_EXIST
+  __IO uint32_t		BRR;
+  __IO uint32_t		gpio_reserved[0xf5];
+#else
   __IO uint32_t		gpio_reserved[0xf6];
-};
+#endif
+  
+} stm32Dev_GPIO;
 
-typedef struct _stStm32l4_GPIO  stm32Dev_GPIO;
 
+
+/**************************************************************
+ * Port Function Register
+ * [15:14] mode  in/out/func/analog
+ * [13:12] pull none/up/down
+ * [11:9]  reserved (if mode is in/out)
+ * [8]     val      (if mode is in/out)
+ * [11:8]  func     (if mode is func)
+ * [7:3]   port (A -- J)
+ * [2:0]   num (0 -- 7)
+ */
+
+#define	GPIO_NUM_SHIFT		(0)
+#define	GPIO_NUM_MASK		(0xf << (GPIO_NUM_SHIFT))
+#define	GPIO_PORT_SHIFT		(4)
+#define	GPIO_PORT_MASK		(0xf << (GPIO_PORT_SHIFT))
+#define	GPIO_PORTNUM_SHIFT	(0)
+#define	GPIO_PORTNUM_MASK	( (GPIO_PORT_MASK) | (GPIO_NUM_MASK) )
+
+#define	GPIO_PORT_A		(0)
+#define	GPIO_PORT_B		(1)
+#define	GPIO_PORT_C		(2)
+#define	GPIO_PORT_D		(3)
+#define	GPIO_PORT_E		(4)
+#define	GPIO_PORT_F		(5)
+#define	GPIO_PORT_G		(6)
+#define	GPIO_PORT_H		(7)
+#define	GPIO_PORT_I		(8)
+#define	GPIO_PORT_J		(9)
+
+#define GPIO_MODE_SHIFT         (14)
+#define GPIO_MODE_MASK          (3 << (GPIO_MODE_SHIFT))
+#define GPIO_MODE_INPUT         (0 << (GPIO_MODE_SHIFT))
+#define GPIO_MODE_OUTPUT        (1 << (GPIO_MODE_SHIFT))
+#define GPIO_MODE_FUNC          (2 << (GPIO_MODE_SHIFT))
+#define GPIO_MODE_ANALOG        (3 << (GPIO_MODE_SHIFT))
+
+/*
+ * UP/DOWN are valid in input and function mode
+ * OPENDRAIN is valid in output and function mode
+ */
+#define GPIO_PULL_SHIFT         (12)
+#define GPIO_PULL_MASK          (3 << (GPIO_PULL_SHIFT))
+#define GPIO_PULL_NONE          (0 << (GPIO_PULL_SHIFT))
+#define GPIO_PULL_UP            (1 << (GPIO_PULL_SHIFT))
+#define GPIO_PULL_DOWN          (2 << (GPIO_PULL_SHIFT))
+#define GPIO_PULL_OD            (3 << (GPIO_PULL_SHIFT))
+
+#define GPIO_VAL_SHIFT          (8)
+#define GPIO_VAL_MASK           (1 << (GPIO_VAL_SHIFT))
+#define GPIO_VAL_0              (0 << (GPIO_VAL_SHIFT))
+#define GPIO_VAL_1              (1 << (GPIO_VAL_SHIFT))
+
+#define GPIO_FUNC_SHIFT         (8)
+#define GPIO_FUNC_MASK          (15 << (GPIO_FUNC_SHIFT))
+#define GPIO_FUNC(x)            (((x) << (GPIO_FUNC_SHIFT)) & GPIO_FUNC_MASK)
+#define GPIO_VALFUNC_SHIFT      (8)
+#define GPIO_VALFUNC_MASK       (15 << (GPIO_VALFUNC_SHIFT))
+
+#define GPIO_PORTNUM(port, num) ((((port) << GPIO_PORT_SHIFT) & GPIO_PORT_MASK) | \
+                                 (((num)  << GPIO_NUM_SHIFT)  & GPIO_NUM_MASK))
+
+/*
+ * [15: 14]: mode [0:input, 1:output, 2:func, 3:analog]
+ * [13: 12]: pull [0:none,  1:up,     2:down, 3:opendrain]
+ * [11: 8]:  valfunc   val set 0/1, if output mode
+ *                     func15-0 is selected, if func mode
+ * [ 7:0]:   portnum    port and bit number
+ */
+#define PORT_CTRL(portnum, mode, pull, valfunc) \
+  (((portnum)  & (GPIO_PORTNUM_MASK) ) | \
+   ((mode)     & (GPIO_MODE_MASK) )  | \
+   ((pull)     & (GPIO_PULL_MASK) )   | \
+   ((valfunc)  & (GPIO_VALFUNC_MASK)  ) )
+
+#define PORT_CTRL_END           (0xffff)
+
+
+#if 0
 #define GPIO_MODULE_A	0
 #define GPIO_MODULE_B	1
 #define GPIO_MODULE_C	2
 #define GPIO_MODULE_H	7
 /*#define GPIO		(GPIO_PTR[8])*/
+#endif
 
 
 #endif

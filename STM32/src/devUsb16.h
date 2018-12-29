@@ -50,6 +50,8 @@ typedef struct {
   uint8_t               up: 1;
   uint8_t               dma: 1;
   uint8_t               waitSetupPayload: 1;
+  uint8_t               busy: 1;
+  uint8_t               fillDbuf: 1;
 
   uint8_t               unit;
   stm32Dev_USB          *dev;
@@ -119,7 +121,7 @@ static void     DevUsb16SetAddress(stm32Dev_USB *p, uint8_t addr);
 
 static int      DevUsbStartPacketOut(devUsbSc_t *psc, uint8_t epnum);
 static int      DevUsbStartPacketIn(devUsbSc_t *psc, uint8_t epnum);
-static int      DevUsbWritePacket(devUsbSc_t *psc, uint8_t epnum, int fill_dbuf);
+static int      DevUsbWritePacket(devUsbSc_t *psc, uint8_t epnum);
 
 
 #endif

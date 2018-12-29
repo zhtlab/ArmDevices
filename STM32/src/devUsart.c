@@ -46,10 +46,21 @@ DevUsartInit(int unit, devUsartParam_t *param)
 
   if(unit == -1) {
     memset(&usart, 0, sizeof(usart));
+#ifdef  LPUART1_PTR
     usart.sc[1].dev = LPUART1_PTR;
+#endif
+#ifdef  USART1_PTR
+    usart.sc[1].dev = USART1_PTR;
+#endif
+#ifdef  USART2_PTR
     usart.sc[2].dev = USART2_PTR;
+#endif
+#ifdef  USART3_PTR
     usart.sc[3].dev = USART3_PTR;
+#endif
+#ifdef  USART4_PTR
     usart.sc[4].dev = USART4_PTR;
+#endif
 #if 0
     usart.sc[4].dev = UART4;
     usart.sc[5].dev = UART5;
@@ -70,13 +81,24 @@ DevUsartInit(int unit, devUsartParam_t *param)
   SystemGetClockValue(&clk);
 
   switch(unit) {
+#ifdef  USART2_PTR
+  case        1:
+    masterClk = clk.pclk2;      /* adhoc */
+    irq = USART1_IRQn;
+    break;
+#endif
+#ifdef  USART2_PTR
   case        2:
     masterClk = clk.pclk1;      /* adhoc */
     irq = USART2_IRQn;
     break;
+#endif
+#ifdef  USART3_PTR
   case        3:
     masterClk = clk.pclk2;      /* adhoc */
     irq = USART3_IRQn;
+    break;
+#endif
   }
 
   if(psc->param.mode == DEVUSART_MODE_FIFO) {

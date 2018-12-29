@@ -100,6 +100,7 @@
 #define GPIO_FUNC15             ((FUNC15) << (GPIO_FUNC_SHIFT))
 #define GPIO_VALFUNC_SHIFT      (8)
 #define GPIO_VALFUNC_MASK       (15 << (GPIO_VALFUNC_SHIFT))
+#define GPIO_VALFUNC(x)         (((x) << (GPIO_VALFUNC_SHIFT)) & GPIO_VALFUNC_MASK)
 
 #define GPIO_PORTNUM(port, num)  ((((port) << GPIO_PORT_SHIFT) & GPIO_PORT_MASK) | \
                                   (((num)  << GPIO_NUM_SHIFT)  & GPIO_NUM_MASK))

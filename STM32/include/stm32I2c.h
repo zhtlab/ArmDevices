@@ -26,6 +26,14 @@
 
 typedef struct {
   __IO uint32_t         CR1;            /* 0x00 */
+#define I2C_CR1_GCEN_SHIFT              19
+#define I2C_CR1_GCEN_MASK               (1 << (I2C_CR1_GCEN_SHIFT))
+#define I2C_CR1_GCEN_NO                 (0 << (I2C_CR1_GCEN_SHIFT))
+#define I2C_CR1_GCEN_YES                (1 << (I2C_CR1_GCEN_SHIFT))
+#define I2C_CR1_WUPEN_SHIFT             18
+#define I2C_CR1_WUPEN_MASK              (1 << (I2C_CR1_WUPEN_SHIFT))
+#define I2C_CR1_WUPEN_NO                (0 << (I2C_CR1_WUPEN_SHIFT))
+#define I2C_CR1_WUPEN_YES               (1 << (I2C_CR1_WUPEN_SHIFT))
 #define I2C_CR1_NOSTRETCH_SHIFT         17
 #define I2C_CR1_NOSTRETCH_MASK          (1 << (I2C_CR1_NOSTRETCH_SHIFT))
 #define I2C_CR1_NOSTRETCH_NO            (0 << (I2C_CR1_NOSTRETCH_SHIFT))
@@ -108,7 +116,32 @@ typedef struct {
 #define I2C_CR2_SADD_VAL(x)             (((x) << (I2C_CR2_SADD_SHIFT)) & I2C_CR2_SADD_MASK)
 
   __IO uint32_t         OAR1;           /* 0x08 */
+#define I2C_OAR1_OA1EN_SHIFT            15
+#define I2C_OAR1_OA1EN_MASK             (0x7f << (I2C_OAR1_OA1EN_SHIFT))
+#define I2C_OAR1_OA1EN_NO               (0 << (I2C_OAR1_OA1EN_SHIFT))
+#define I2C_OAR1_OA1EN_YES              (1 << (I2C_OAR1_OA1EN_SHIFT))
+#define I2C_OAR1_OA1MODE_SHIFT          10
+#define I2C_OAR1_OA1MODE_MASK           (0x7f << (I2C_OAR1_OA1MODE_SHIFT))
+#define I2C_OAR1_OA1MODE_7BIT           (0 << (I2C_OAR1_OA1MODE_SHIFT))
+#define I2C_OAR1_OA1MODE_10BIT          (1 << (I2C_OAR1_OA1MODE_SHIFT))
+#define I2C_OAR1_OA1_7BIT_SHIFT         1
+#define I2C_OAR1_OA1_7BIT_MASK          (0x7f << (I2C_OAR1_OA1_7BIT_SHIFT))
+#define I2C_OAR1_OA1_10BIT_MASK         (0x3ff)
+#define I2C_OAR1_OA1_7BIT_VAL(x)        (((x) << (I2C_OAR1_OA1_7BIT_SHIFT)) & I2C_OAR1_OA1_7BIT_MASK)
+#define I2C_OAR1_OA1_10BIT_VAL(x)       ((x) & I2C_OAR1_OA1_10BIT_MASK)
+
   __IO uint32_t         OAR2;           /* 0x0c */
+#define I2C_OAR2_OA2EN_SHIFT            15
+#define I2C_OAR2_OA2EN_MASK             (0x7f << (I2C_OAR2_OA2EN_SHIFT))
+#define I2C_OAR2_OA2EN_NO               (0 << (I2C_OAR2_OA2EN_SHIFT))
+#define I2C_OAR2_OA2EN_YES              (1 << (I2C_OAR2_OA2EN_SHIFT))
+#define I2C_OAR2_OA2MODE_SHIFT          10
+#define I2C_OAR2_OA2MODE_MASK           (0x7f << (I2C_OAR2_OA2MODE_SHIFT))
+#define I2C_OAR2_OA2_7BIT_SHIFT         1
+#define I2C_OAR2_OA2_7BIT_MASK          (0x7f << (I2C_OAR2_OA2_7BIT_SHIFT))
+#define I2C_OAR2_OA2_10BIT_MASK         (0x3ff)
+#define I2C_OAR2_OA2_7BIT_VAL(x)        (((x) << (I2C_OAR2_OA2_7BIT_SHIFT)) & I2C_OAR2_OA2_7BIT_MASK)
+#define I2C_OAR2_OA2_10BIT_VAL(x)       ((x) & I2C_OAR2_OA2_10BIT_MASK)
 
   __IO uint32_t         TIMINGR;        /* 0x10 */
 #define I2C_TIMINGR_PRESC_SHIFT         28
