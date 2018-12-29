@@ -466,6 +466,13 @@ typedef struct {
 #define RCC_AHB2ENR_GPIOHEN_NO          (0 << (RCC_AHB2ENR_GPIOHEN_SHIFT))
 #define RCC_AHB2ENR_GPIOHEN_YES         (1 << (RCC_AHB2ENR_GPIOHEN_SHIFT))
 
+#define RCC_GPIOAEN_YES                 (RCC_AHB2ENR_GPIOAEN_YES)
+#define RCC_GPIOBEN_YES                 (RCC_AHB2ENR_GPIOBEN_YES)
+#define RCC_GPIOCEN_YES                 (RCC_AHB2ENR_GPIOCEN_YES)
+#define RCC_GPIODEN_YES                 (RCC_AHB2ENR_GPIODEN_YES)
+#define RCC_GPIOEEN_YES                 (RCC_AHB2ENR_GPIOEEN_YES)
+#define RCC_GPIOHEN_YES                 (RCC_AHB2ENR_GPIOHEN_YES)
+
 #define RCC_AHB2ENR_ADCEN_SHIFT         13
 #define RCC_AHB2ENR_ADCEN_MASK          (1 << (RCC_AHB2ENR_ADCEN_SHIFT))
 #define RCC_AHB2ENR_ADCEN_NO            (0 << (RCC_AHB2ENR_ADCEN_SHIFT))
