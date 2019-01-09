@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 zhtlab
+ * Copyright (c) 2018,2019 zhtlab
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files
@@ -379,7 +379,7 @@ DevUsartSendFifo(devUsartSc_t *psc)
 
   p = psc->dev;
 
-  FifoGetReadPointer(psc->dFifoTx, (char **)&ptr, &size);
+  FifoGetReadPointer(psc->dFifoTx, &ptr, &size);
   cnt = 0;
   while(size-- > 0) {
     if(!(p->ISR & USART_CR1_TXEIE_MASK)) break;
