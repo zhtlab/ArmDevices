@@ -35,7 +35,6 @@
 
 struct _stDevUsb        devUsb;
 
-#define sss 0
 
 #if CONFIG_USE_RTOS
 #define UsbdcoreCbBusState(unit, state) UsbdcoreCbIsr((unit), \
@@ -110,6 +109,31 @@ DevUsbInit(int unit, devUsbParam_t *param, usbdifDevFifo_t *pSize)
   p->BCDR   = USB_BCDR_DPPU_YES;
 
 end:
+  return result;
+}
+
+
+int
+DevUsbDeinit(int unit)
+{
+  int           result = -1;
+  devUsbSc_t            *psc;
+  stm32Dev_USB          *p;
+
+  int                   i;
+
+  psc = &devUsb.sc[unit];
+  p   = psc->dev;
+
+#if 0
+  for(int i = 0; i < USB_MAX_EPOUT; i++) {
+    DevUsbCloseEp(unit, i);
+  }
+#endif
+
+  p->BCDR   = 0;
+  p->CNTR   = 0;
+
   return result;
 }
 
@@ -303,8 +327,11 @@ DevUsbInterrupt(devUsbSc_t *psc)
   }
   p->ISTR &= ~intr;
 
+
   /* SOF interrupt */
   if(intr & USB_CNTR_SOF_MASK) DevUsbInterruptSof(psc);
+
+
   /* resume Interrupt */
   if(intr & USB_CNTR_WKUP_MASK) {
     p->CNTR &= ~USB_CNTR_LPMODE_MASK;
@@ -326,7 +353,7 @@ DevUsbInterrupt(devUsbSc_t *psc)
 
   /* LPM interrupt */
   if(intr & USB_CNTR_L1REQ_MASK) {
-    puts("L1REQ\n");
+    //puts("L1REQ\n");
     if(psc->lpmState == DEVUSB_LPM_L0) {
       psc->lpmState = DEVUSB_LPM_L1;
       /*  LPM_Callback(hpcd, LPM_L1_ACTIVE);  */  /* return immediatly */
@@ -795,18 +822,19 @@ DevUsbWritePacket(devUsbSc_t *psc, uint8_t epnum)
 
         /* data fill */
         pSrc = (uint16_t *)psc->in[num].ptr;
+        pBuf += (off>>1);
         if(!((uint32_t)pSrc & 1)) {
-          pBuf += (off>>1);
-          for(int i = 0; i < (size+1)/2; i++) pBuf[i] = pSrc[i];
+          for(int i = 0; i < (size+1)/2; i++) *pBuf++ = *pSrc++;
         } else {
-          uint8_t       *pBuf8, *pSrc8;
+          uint8_t       *pSrc8;
           pSrc8 = (uint8_t *)pSrc;
-          pBuf8 = (uint8_t *)pBuf + off;
-          for(int i = 0; i < size; i++) pBuf8[i] = pSrc8[i];
+          for(int i = 0; i < (size+1)/2; i++) {
+            *pBuf++ = (pSrc8[0])|(pSrc8[1]<<8);
+            pSrc8 += 2;
+          }
         }
         psc->in[num].ptr += size;
         psc->in[num].cnt += size;
-
       }
       stat = USB_EP_STAT_TX_VALID;
 

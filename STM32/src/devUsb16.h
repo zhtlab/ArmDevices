@@ -77,6 +77,7 @@ struct _stDevUsb {
 
 
 int             DevUsbInit(int unit, devUsbParam_t *param, usbdifDevFifo_t *pFifo);
+int             DevUsbDeinit(int unit);
 
 void            DevUsbInterruptUsb1(void);
 void            DevUsbInterruptUsb2(void);
