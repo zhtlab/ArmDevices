@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 zhtlab
+ * Copyright (c) 2018,2019 zhtlab
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files
@@ -23,6 +23,10 @@
 
 #ifndef _STM32L0FLASH_H_
 #define _STM32L0FLASH_H_
+
+#define FLASH_PAGE_SIZE                 128
+#define FLASH_ERASED_VALUE              0x00
+#define FLASH_ERASED_VALUE32            0x00000000UL
 
 typedef struct {
   __IO uint32_t         ACR;            /* 0x00 */
