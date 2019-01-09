@@ -24,6 +24,9 @@
 #ifndef _STM32L4FLASH_H_
 #define _STM32L4FLASH_H_
 
+#define FLASH_ERASED_VALUE              0xff
+#define FLASH_ERASED_VALUE32            0xffffffffUL
+
 typedef struct {
   __IO uint32_t		ACR;
 #define FLASH_LATENCY_SHIFT	(0)
