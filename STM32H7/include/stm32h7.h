@@ -838,16 +838,16 @@ typedef struct {
 
 #include        "stm32Usart.h"
 
-#define USART1_PTR      ((stm32DEV_USART *) ((APB2_BASE) + 0x1000))
-#define USART6_PTR      ((stm32DEV_USART *) ((APB2_BASE) + 0x1400))
+#define USART1_PTR      ((stm32Dev_USART *) ((APB2_BASE) + 0x1000))
+#define USART6_PTR      ((stm32Dde_USART *) ((APB2_BASE) + 0x1400))
 
 #define USART_PTR       ((stm32Dev_USART *) ((APB1_BASE) + 0x4000))
 #define USART2_PTR      (&USART_PTR[1])
 #define USART3_PTR      (&USART_PTR[2])
 #define USART4_PTR      (&USART_PTR[3])        /* actual name is UART4 */
 #define UART5_PTR       (&USART_PTR[4])
-#define UART6_PTR       ((stm32DEV_USART *) ((APB1_BASE) + 0x7800))
-#define UART7_PTR       ((stm32DEV_USART *) ((APB1_BASE) + 0x7c00))
+#define UART6_PTR       ((stm32Dde_USART *) ((APB1_BASE) + 0x7800))
+#define UART7_PTR       ((stm32Dde_USART *) ((APB1_BASE) + 0x7c00))
 #define LPUART1_PTR     ((stm32Dev_USART *) ((APB4_BASE) + 0x0c00))
 
 
